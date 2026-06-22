@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StarkPBX — Nuevo Ticket</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      color: #1a1a2e;
+      min-height: 100vh;
+    }
+    .wrap { padding: 1rem; max-width: 500px; margin: 0 auto; }
+
+    /* Header */
+    .hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e4ef; }
+    .hdr-ico { width: 38px; height: 38px; border-radius: 8px; background: #e8f0fe; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .hdr-ico i { font-size: 20px; color: #1a73e8; }
+    .hdr h1 { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+    .hdr p { font-size: 12px; color: #6b7280; margin-top: 2px; }
+
+    /* Stepper */
+    .steps { display: flex; align-items: center; margin-bottom: 1.25rem; }
+    .step { display: flex; flex-direction: column; align-items: center; flex: 1; }
+    .sdot { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #9ca3af; background: #fff; transition: all .2s; }
+    .sdot.active { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
+    .sdot.done { border-color: #16a34a; background: #dcfce7; color: #16a34a; }
+    .slbl { font-size: 10px; color: #9ca3af; }
+    .slbl.active { color: #1a73e8; font-weight: 600; }
+    .sline { flex: none; width: 20px; height: 1px; background: #e5e7eb; margin-bottom: 14px; }
+
+    /* Cards */
+    .card { display: none; }
+    .card.on { display: block; animation: fi .18s ease; }
+    @keyframes fi { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Sección */
+    .sec { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; display: flex; align-items: center; gap: 5px; }
+    .sec i { font-size: 14px; }
+
+    /* Campos */
+    .f { margin-bottom: .85rem; }
+    .f label { display: block; font-size: 13px; color: #374151; font-weight: 500; margin-bottom: 5px; }
+    .f label .r { color: #dc2626; margin-left: 1px; }
+    .f input, .f select, .f textarea {
+      width: 100%; font-size: 14px; padding: 9px 11px;
+      border: 1px solid #d1d5db; border-radius: 8px;
+      background: #fff; color: #1a1a2e;
+      transition: border-color .15s;
+    }
+    .f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: #1a73e8; }
+    .f textarea { resize: vertical; min-height: 82px; line-height: 1.5; }
+    .f .em { font-size: 11px; color: #dc2626; margin-top: 3px; display: none; }
+    .f.bad .em { display: block; }
+    .f.bad input, .f.bad select, .f.bad textarea { border-color: #dc2626; }
+
+    .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    /* Autocomplete */
+    .ac-wrap { position: relative; }
+    .ac-list { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; z-index: 20; max-height: 150px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .ac-item { padding: 9px 12px; font-size: 13px; cursor: pointer; color: #1a1a2e; }
+    .ac-item:hover { background: #f3f4f6; }
+    .ac-empty { padding: 9px 12px; font-size: 13px; color: #6b7280; }
+
+    /* Pills */
+    .pills { display: flex; gap: 6px; }
+    .pill { flex: 1; padding: 9px 4px; border: 1px solid #d1d5db; border-radius: 8px; text-align: center; font-size: 13px; cursor: pointer; color: #6b7280; transition: all .15s; user-select: none; }
+    .pill.alto { background: #fef2f2; border-color: #fca5a5; color: #dc2626; font-weight: 600; }
+    .pill.medio { background: #fffbeb; border-color: #fcd34d; color: #d97706; font-weight: 600; }
+    .pill.bajo { background: #f0fdf4; border-color: #86efac; color: #16a34a; font-weight: 600; }
+
+    /* Navegación */
+    .nav { display: flex; gap: 8px; margin-top: 1.25rem; }
+    .bbk { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #6b7280; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .bnx { flex: 1; padding: 10px 14px; border: 1px solid #1a73e8; border-radius: 8px; background: #e8f0fe; color: #1a73e8; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .bnx:disabled, .bsend:disabled { opacity: .35; cursor: not-allowed; }
+    .bsend { flex: 1; padding: 12px; border: none; border-radius: 8px; background: #1a73e8; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; }
+
+    /* Preview */
+    .prev { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: .85rem; margin-bottom: 1rem; }
+    .prev h3 { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: .6rem; display: flex; align-items: center; gap: 5px; }
+    .prow { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #f3f4f6; }
+    .prow:last-child { border: none; }
+    .pk { color: #6b7280; }
+    .pv { color: #1a1a2e; font-weight: 500; text-align: right; max-width: 60%; word-break: break-word; }
+
+    /* Spinner */
+    .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: sp .6s linear infinite; }
+    @keyframes sp { to { transform: rotate(360deg); } }
+
+    /* Éxito */
+    .ok { text-align: center; padding: 2.5rem 1rem; display: none; }
+    .ok i { font-size: 52px; color: #16a34a; }
+    .ok h2 { font-size: 17px; font-weight: 600; margin: .75rem 0 .25rem; }
+    .ok p { font-size: 13px; color: #6b7280; line-height: 1.6; }
+    .tnum { display: inline-block; margin: .75rem 0; padding: .5rem 1.5rem; background: #e8f0fe; color: #1a73e8; border-radius: 8px; font-size: 18px; font-weight: 700; }
+    .btn-new { margin-top: .75rem; padding: 9px 20px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #6b7280; font-size: 13px; cursor: pointer; }
+  </style>
+</head>
+<body>
+<div id="mainWrap">
+  <div class="wrap">
+    <div class="hdr">
+      <div class="hdr-ico"><i class="ti ti-ticket"></i></div>
+      <div>
+        <h1>Nuevo ticket — ServiceNow</h1>
+        <p>StarkPBX · Soporte técnico</p>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <div class="steps">
+      <div class="step"><div class="sdot active" id="sd1">1</div><div class="slbl active" id="sl1">Cliente</div></div>
+      <div class="sline"></div>
+      <div class="step"><div class="sdot" id="sd2">2</div><div class="slbl" id="sl2">Solución</div></div>
+      <div class="sline"></div>
+      <div class="step"><div class="sdot" id="sd3">3</div><div class="slbl" id="sl3">Impacto</div></div>
+      <div class="sline"></div>
+      <div class="step"><div class="sdot" id="sd4">4</div><div class="slbl" id="sl4">Confirmar</div></div>
+    </div>
+
+    <!-- PASO 1 -->
+    <div class="card on" id="p1">
+      <div class="sec"><i class="ti ti-building"></i> Identificación del cliente</div>
+      <div class="f" id="f-cuenta">
+        <label>Cuenta <span class="r">*</span></label>
+        <input type="text" id="cuenta" placeholder="Ej. Corporativo GS, BBVA Norte..." oninput="chk1()">
+        <div class="em">Campo requerido</div>
+      </div>
+      <div class="f" id="f-cliente">
+        <label>Cliente <span class="r">*</span></label>
+        <div class="ac-wrap">
+          <input type="text" id="cliSearch" placeholder="Escribe nombre del cliente..." oninput="buscarCliente()" autocomplete="off">
+          <div class="ac-list" id="acList"></div>
+        </div>
+        <input type="hidden" id="cliSysId">
+        <div class="em">Selecciona un cliente de la lista</div>
+      </div>
+      <div class="nav">
+        <button class="bnx" id="b1n" onclick="ir(2)" disabled>Siguiente <i class="ti ti-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div class="card" id="p2">
+      <div class="sec"><i class="ti ti-tag"></i> Clasificación del caso</div>
+      <div class="g2">
+        <div class="f" id="f-pbx">
+          <label>Tipo de PBX <span class="r">*</span></label>
+          <select id="tipo_pbx" onchange="chk2()">
+            <option value="">— Selecciona —</option>
+            <option value="SYS_ONPREMISE">On Premise</option>
+            <option value="SYS_CLOUD">Cloud</option>
+          </select>
+          <div class="em">Requerido</div>
+        </div>
+        <div class="f" id="f-proyecto">
+          <label>Tipo de proyecto <span class="r">*</span></label>
+          <select id="tipo_proyecto" onchange="chk2()">
+            <option value="">— Selecciona —</option>
+            <option value="SYS_EKT">Paquete EKT</option>
+            <option value="SYS_TP">Paquetes TP</option>
+            <option value="SYS_TFE_TP">TFE TP</option>
+            <option value="SYS_TFE_GS">TFE GS</option>
+            <option value="SYS_TFE_VIP">TFE VIP</option>
+          </select>
+          <div class="em">Requerido</div>
+        </div>
+      </div>
+      <div class="f" id="f-paquete">
+        <label>Paquete <span class="r">*</span></label>
+        <select id="paquete" onchange="chk2()">
+          <option value="">— Selecciona —</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+      <div class="f" id="f-solucion">
+        <label>Tipo de solución <span class="r">*</span></label>
+        <select id="tipo_solucion" onchange="onSolucion()">
+          <option value="">— Selecciona —</option>
+          <option value="SYS_AHEEVA">Aheeva</option>
+          <option value="SYS_CHATBOT">Chat bot</option>
+          <option value="SYS_HARDPHONE">Hardphone</option>
+          <option value="SYS_PBX">PBX</option>
+          <option value="SYS_PBXACT">PBXact</option>
+          <option value="SYS_SOFTPHONE">Softphone</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+      <div class="f" id="f-solicitud">
+        <label>Solicitud <span class="r">*</span></label>
+        <select id="solicitud" onchange="chk2()" disabled>
+          <option value="">— Primero elige tipo de solución —</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+      <div class="nav">
+        <button class="bbk" onclick="ir(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="bnx" id="b2n" onclick="ir(3)" disabled>Siguiente <i class="ti ti-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- PASO 3 -->
+    <div class="card" id="p3">
+      <div class="sec"><i class="ti ti-alert-triangle"></i> Descripción e impacto</div>
+      <div class="f" id="f-desc">
+        <label>Descripción del problema <span class="r">*</span></label>
+        <textarea id="descripcion" placeholder="Describe el problema o solicitud con detalle..." oninput="chk3()"></textarea>
+        <div class="em">Agrega una descripción</div>
+      </div>
+      <div class="f" id="f-tiempo">
+        <label>Tiempo promedio de atención <span class="r">*</span></label>
+        <select id="tiempo" onchange="chk3()">
+          <option value="">— Selecciona —</option>
+          <option value="SYS_30M">30 minutos</option>
+          <option value="SYS_60M">60 minutos</option>
+          <option value="SYS_120M">120 minutos</option>
+          <option value="SYS_240M">240 minutos</option>
+          <option value="SYS_480M">480 minutos</option>
+          <option value="SYS_1440M">1 día (1440 min)</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+      <div class="f">
+        <label>Impacto <span class="r">*</span></label>
+        <div class="pills" id="grp-impacto">
+          <div class="pill" onclick="pill('impacto','3','bajo',this)">Bajo</div>
+          <div class="pill" onclick="pill('impacto','2','medio',this)">Medio</div>
+          <div class="pill" onclick="pill('impacto','1','alto',this)">Alto</div>
+        </div>
+        <input type="hidden" id="impacto">
+      </div>
+      <div class="f">
+        <label>Urgencia <span class="r">*</span></label>
+        <div class="pills" id="grp-urgencia">
+          <div class="pill" onclick="pill('urgencia','3','bajo',this)">Baja</div>
+          <div class="pill" onclick="pill('urgencia','2','medio',this)">Media</div>
+          <div class="pill" onclick="pill('urgencia','1','alto',this)">Alta</div>
+        </div>
+        <input type="hidden" id="urgencia">
+      </div>
+      <div class="nav">
+        <button class="bbk" onclick="ir(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
+        <button class="bnx" id="b3n" onclick="ir(4)" disabled>Revisar <i class="ti ti-eye"></i></button>
+      </div>
+    </div>
+
+    <!-- PASO 4 -->
+    <div class="card" id="p4">
+      <div class="sec"><i class="ti ti-clipboard-check"></i> Confirmación</div>
+      <div class="prev" id="prevFinal"></div>
+      <div class="nav">
+        <button class="bbk" onclick="ir(3)"><i class="ti ti-arrow-left"></i> Editar</button>
+        <button class="bsend" id="bsend" onclick="enviar()">
+          <i class="ti ti-send"></i> Crear ticket en ServiceNow
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Éxito -->
+<div class="ok" id="okScreen">
+  <i class="ti ti-circle-check"></i>
+  <h2>Ticket creado</h2>
+  <div class="tnum" id="tnum">INC0000000</div>
+  <p>Enviado a ServiceNow vía n8n.<br>El área de PBX fue notificada.</p>
+  <button class="btn-new" onclick="location.reload()">Crear otro ticket</button>
+</div>
+
+<script>
+  // ── CONFIGURACIÓN ── reemplaza con tu URL de n8n
+  const N8N_WEBHOOK = 'https://TU-N8N.com/webhook/starkpbx-ticket';
+
+  // Clientes (puedes cargar esto desde n8n en el futuro)
+  const CLIENTS = [
+    { name: 'Grupo Salinas', sys_id: '9e02123487652910935586ad0ebb35c7' },
+    { name: 'Televisa Univision', sys_id: 'aabb1234567890abcdef1234567890ab' },
+    { name: 'BBVA México', sys_id: 'bbcc2345678901bcdef2345678901bc' },
+    { name: 'Bimbo México', sys_id: 'ccdd3456789012cdef3456789012cd' },
+    { name: 'América Móvil', sys_id: 'ddee4567890123def4567890123de' },
+    { name: 'Cemex', sys_id: 'eeff5678901234ef5678901234ef56' },
+    { name: 'Elektra', sys_id: 'ffaa6789012345fa6789012345fa67' },
+    { name: 'Grupo Modelo', sys_id: 'aabb7890123456ab7890123456ab78' },
+    { name: 'Liverpool', sys_id: 'bbcc8901234567bc8901234567bc89' },
+    { name: 'Oxxo', sys_id: 'ccdd9012345678cd9012345678cd90' },
+  ];
+
+  const SOL = {
+    SYS_AHEEVA:   [{ l: 'Configuración de agentes', v: 'SYS_AHE_01' }, { l: 'Falla de cola', v: 'SYS_AHE_02' }, { l: 'Reporte de campañas', v: 'SYS_AHE_03' }],
+    SYS_CHATBOT:  [{ l: 'Diseño de flujo', v: 'SYS_BOT_01' }, { l: 'Integración CRM', v: 'SYS_BOT_02' }, { l: 'Entrenamiento NLP', v: 'SYS_BOT_03' }],
+    SYS_HARDPHONE:[{ l: 'Registro de teléfono', v: 'SYS_HP_01' }, { l: 'Sin audio', v: 'SYS_HP_02' }, { l: 'Firmware', v: 'SYS_HP_03' }],
+    SYS_PBX:      [{ l: 'Caída de troncal SIP', v: 'SYS_PBX_01' }, { l: 'Fallo de extensión', v: 'SYS_PBX_02' }, { l: 'Error de enrutamiento', v: 'SYS_PBX_03' }, { l: 'IVR / Auto Attendant', v: 'SYS_PBX_04' }],
+    SYS_PBXACT:   [{ l: 'Instalación', v: 'SYS_PBXACT_01' }, { l: 'Licenciamiento', v: 'SYS_PBXACT_02' }, { l: 'Módulos FreePBX', v: 'SYS_PBXACT_03' }],
+    SYS_SOFTPHONE:[{ l: 'No registra', v: 'SYS_SP_01' }, { l: 'Problemas de audio', v: 'SYS_SP_02' }, { l: 'Configuración VPN', v: 'SYS_SP_03' }],
+  };
+
+  // Poblar paquetes
+  const paqSel = document.getElementById('paquete');
+  for (let i = 4; i <= 350; i += 4) {
+    const o = document.createElement('option');
+    o.value = 'SYS_SIP_' + i;
+    o.textContent = 'SIP_' + String(i).padStart(3, '0');
+    paqSel.appendChild(o);
+  }
+
+  let cur = 1, cliOk = false;
+
+  function ir(n) {
+    document.getElementById('p' + cur).classList.remove('on');
+    cur = n;
+    document.getElementById('p' + n).classList.add('on');
+    updStepper();
+    if (n === 4) buildPrev();
+  }
+
+  function updStepper() {
+    [1, 2, 3, 4].forEach(i => {
+      const d = document.getElementById('sd' + i), l = document.getElementById('sl' + i);
+      d.classList.remove('active', 'done'); l.classList.remove('active');
+      if (i < cur) { d.classList.add('done'); d.innerHTML = '<i class="ti ti-check" style="font-size:11px"></i>'; }
+      else if (i === cur) { d.classList.add('active'); d.textContent = i; l.classList.add('active'); }
+      else d.textContent = i;
+    });
+  }
+
+  function buscarCliente() {
+    const q = document.getElementById('cliSearch').value.trim().toLowerCase();
+    cliOk = false; document.getElementById('cliSysId').value = '';
+    const list = document.getElementById('acList');
+    if (q.length < 2) { list.style.display = 'none'; chk1(); return; }
+    const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q));
+    list.innerHTML = m.length
+      ? m.map(c => `<div class="ac-item" onclick="pickCli('${c.sys_id}','${c.name}')">${c.name}</div>`).join('')
+      : '<div class="ac-empty">Sin resultados — n8n buscará en ServiceNow</div>';
+    list.style.display = 'block';
+    chk1();
+  }
+
+  function pickCli(sid, name) {
+    document.getElementById('cliSearch').value = name;
+    document.getElementById('cliSysId').value = sid;
+    document.getElementById('acList').style.display = 'none';
+    cliOk = true; chk1();
+  }
+
+  function chk1() {
+    document.getElementById('b1n').disabled = !(document.getElementById('cuenta').value.trim() && cliOk);
+  }
+
+  function onSolucion() {
+    const s = document.getElementById('tipo_solucion').value;
+    const sel = document.getElementById('solicitud');
+    sel.innerHTML = '<option value="">— Selecciona —</option>';
+    if (s && SOL[s]) { SOL[s].forEach(x => { const o = document.createElement('option'); o.value = x.v; o.textContent = x.l; sel.appendChild(o); }); sel.disabled = false; }
+    else sel.disabled = true;
+    chk2();
+  }
+
+  function chk2() {
+    const ok = ['tipo_pbx', 'tipo_proyecto', 'paquete', 'tipo_solucion', 'solicitud'].every(id => document.getElementById(id).value);
+    document.getElementById('b2n').disabled = !ok;
+  }
+
+  function pill(campo, val, nivel, el) {
+    document.getElementById('grp-' + campo).querySelectorAll('.pill').forEach(p => p.className = 'pill');
+    el.className = 'pill ' + nivel;
+    document.getElementById(campo).value = val;
+    chk3();
+  }
+
+  function chk3() {
+    const ok = document.getElementById('descripcion').value.trim()
+      && document.getElementById('tiempo').value
+      && document.getElementById('impacto').value
+      && document.getElementById('urgencia').value;
+    document.getElementById('b3n').disabled = !ok;
+  }
+
+  function lbl(id) { const e = document.getElementById(id); return e.tagName === 'SELECT' ? e.options[e.selectedIndex]?.text || '' : e.value; }
+  function pillLbl(c) { return document.getElementById('grp-' + c).querySelector('.pill.bajo,.pill.medio,.pill.alto')?.textContent || ''; }
+
+  function buildPrev() {
+    const rows = [
+      ['Cuenta', lbl('cuenta')],
+      ['Cliente', lbl('cliSearch')],
+      ['Tipo de PBX', lbl('tipo_pbx')],
+      ['Tipo de proyecto', lbl('tipo_proyecto')],
+      ['Paquete', lbl('paquete')],
+      ['Tipo de solución', lbl('tipo_solucion')],
+      ['Solicitud', lbl('solicitud')],
+      ['Descripción', document.getElementById('descripcion').value.trim()],
+      ['Tiempo promedio', lbl('tiempo')],
+      ['Impacto', pillLbl('impacto')],
+      ['Urgencia', pillLbl('urgencia')],
+    ];
+    document.getElementById('prevFinal').innerHTML =
+      '<h3><i class="ti ti-clipboard-list"></i> Resumen del ticket</h3>' +
+      rows.map(([k, v]) => `<div class="prow"><span class="pk">${k}</span><span class="pv">${v || '—'}</span></div>`).join('');
+  }
+
+  async function enviar() {
+    const btn = document.getElementById('bsend');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> Enviando...';
+
+    const payload = {
+      sysparm_quantity: 1,
+      telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || 'desconocido',
+      variables: {
+        cuenta: document.getElementById('cuenta').value.trim(),
+        cliente: document.getElementById('cliSysId').value,
+        tipo_de_pbx: document.getElementById('tipo_pbx').value,
+        tipo_de_proyecto: document.getElementById('tipo_proyecto').value,
+        paquete: document.getElementById('paquete').value,
+        tipo_de_solucion: document.getElementById('tipo_solucion').value,
+        solicitud: document.getElementById('solicitud').value,
+        ci_relacionado: 'O00018',
+        descripcion_general: document.getElementById('descripcion').value.trim(),
+        tiempo_promedio: lbl('tiempo'),
+        urgencia: document.getElementById('urgencia').value,
+        impacto: document.getElementById('impacto').value,
+      }
+    };
+
+    try {
+      const res = await fetch(N8N_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      document.getElementById('mainWrap').style.display = 'none';
+      document.getElementById('okScreen').style.display = 'block';
+      document.getElementById('tnum').textContent = data.ticket_number || 'INC' + Math.floor(Math.random() * 9000000 + 1000000);
+      if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+    } catch (e) {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="ti ti-send"></i> Reintentar';
+      alert('Error al enviar. Verifica tu conexión.');
+    }
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.ac-wrap')) document.getElementById('acList').style.display = 'none';
+  });
+
+  // Inicializar Telegram Web App
+  if (window.Telegram?.WebApp) {
+    window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+  }
+</script>
+</body>
+</html>
