@@ -8,22 +8,15 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f4f6f9;
-      color: #1a1a2e;
-      min-height: 100vh;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f6f9; color: #1a1a2e; min-height: 100vh; }
     .wrap { padding: 1rem; max-width: 500px; margin: 0 auto; }
 
-    /* Header */
     .hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e4ef; }
     .hdr-ico { width: 38px; height: 38px; border-radius: 8px; background: #e8f0fe; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .hdr-ico i { font-size: 20px; color: #1a73e8; }
     .hdr h1 { font-size: 15px; font-weight: 600; color: #1a1a2e; }
     .hdr p { font-size: 12px; color: #6b7280; margin-top: 2px; }
 
-    /* Stepper */
     .steps { display: flex; align-items: center; margin-bottom: 1.25rem; }
     .step { display: flex; flex-direction: column; align-items: center; flex: 1; }
     .sdot { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid #d1d5db; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; font-size: 12px; font-weight: 600; color: #9ca3af; background: #fff; transition: all .2s; }
@@ -33,67 +26,64 @@
     .slbl.active { color: #1a73e8; font-weight: 600; }
     .sline { flex: none; width: 20px; height: 1px; background: #e5e7eb; margin-bottom: 14px; }
 
-    /* Cards */
     .card { display: none; }
     .card.on { display: block; animation: fi .18s ease; }
     @keyframes fi { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* Sección */
     .sec { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .06em; margin-bottom: .75rem; display: flex; align-items: center; gap: 5px; }
     .sec i { font-size: 14px; }
 
-    /* Campos */
     .f { margin-bottom: .85rem; }
     .f label { display: block; font-size: 13px; color: #374151; font-weight: 500; margin-bottom: 5px; }
     .f label .r { color: #dc2626; margin-left: 1px; }
-    .f input, .f select, .f textarea {
-      width: 100%; font-size: 14px; padding: 9px 11px;
-      border: 1px solid #d1d5db; border-radius: 8px;
-      background: #fff; color: #1a1a2e;
-      transition: border-color .15s;
-    }
+    .f input, .f select, .f textarea { width: 100%; font-size: 14px; padding: 9px 11px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #1a1a2e; transition: border-color .15s; }
     .f input:focus, .f select:focus, .f textarea:focus { outline: none; border-color: #1a73e8; }
     .f textarea { resize: vertical; min-height: 82px; line-height: 1.5; }
     .f .em { font-size: 11px; color: #dc2626; margin-top: 3px; display: none; }
     .f.bad .em { display: block; }
     .f.bad input, .f.bad select, .f.bad textarea { border-color: #dc2626; }
 
+    /* Campo auto-rellenado */
+    .f input.auto, .f select.auto { background: #f0fdf4; border-color: #86efac; color: #166534; }
+    .auto-badge { font-size: 10px; color: #16a34a; margin-top: 3px; display: none; }
+    .auto-badge.show { display: flex; align-items: center; gap: 3px; }
+
+    /* Campo deshabilitado (TFE) */
+    .f select:disabled, .f input:disabled { background: #f3f4f6; color: #9ca3af; border-color: #e5e7eb; cursor: not-allowed; }
+    .f label .locked { font-size: 10px; color: #9ca3af; font-weight: 400; margin-left: 5px; }
+
     .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    /* Autocomplete */
     .ac-wrap { position: relative; }
-    .ac-list { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; z-index: 20; max-height: 150px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+    .ac-list { position: absolute; top: calc(100% + 3px); left: 0; right: 0; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; z-index: 20; max-height: 180px; overflow-y: auto; display: none; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
     .ac-item { padding: 9px 12px; font-size: 13px; cursor: pointer; color: #1a1a2e; }
     .ac-item:hover { background: #f3f4f6; }
+    .ac-item .ac-sub { font-size: 11px; color: #6b7280; margin-top: 1px; }
     .ac-empty { padding: 9px 12px; font-size: 13px; color: #6b7280; }
 
-    /* Pills */
     .pills { display: flex; gap: 6px; }
     .pill { flex: 1; padding: 9px 4px; border: 1px solid #d1d5db; border-radius: 8px; text-align: center; font-size: 13px; cursor: pointer; color: #6b7280; transition: all .15s; user-select: none; }
     .pill.alto { background: #fef2f2; border-color: #fca5a5; color: #dc2626; font-weight: 600; }
     .pill.medio { background: #fffbeb; border-color: #fcd34d; color: #d97706; font-weight: 600; }
     .pill.bajo { background: #f0fdf4; border-color: #86efac; color: #16a34a; font-weight: 600; }
 
-    /* Navegación */
     .nav { display: flex; gap: 8px; margin-top: 1.25rem; }
     .bbk { padding: 10px 14px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; color: #6b7280; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
     .bnx { flex: 1; padding: 10px 14px; border: 1px solid #1a73e8; border-radius: 8px; background: #e8f0fe; color: #1a73e8; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .bnx:disabled, .bsend:disabled { opacity: .35; cursor: not-allowed; }
     .bsend { flex: 1; padding: 12px; border: none; border-radius: 8px; background: #1a73e8; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; }
 
-    /* Preview */
     .prev { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: .85rem; margin-bottom: 1rem; }
     .prev h3 { font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: .6rem; display: flex; align-items: center; gap: 5px; }
     .prow { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #f3f4f6; }
     .prow:last-child { border: none; }
     .pk { color: #6b7280; }
     .pv { color: #1a1a2e; font-weight: 500; text-align: right; max-width: 60%; word-break: break-word; }
+    .pv.auto-val { color: #16a34a; }
 
-    /* Spinner */
     .spin { display: inline-block; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: sp .6s linear infinite; }
     @keyframes sp { to { transform: rotate(360deg); } }
 
-    /* Éxito */
     .ok { text-align: center; padding: 2.5rem 1rem; display: none; }
     .ok i { font-size: 52px; color: #16a34a; }
     .ok h2 { font-size: 17px; font-weight: 600; margin: .75rem 0 .25rem; }
@@ -113,7 +103,6 @@
       </div>
     </div>
 
-    <!-- Stepper -->
     <div class="steps">
       <div class="step"><div class="sdot active" id="sd1">1</div><div class="slbl active" id="sl1">Cliente</div></div>
       <div class="sline"></div>
@@ -124,14 +113,10 @@
       <div class="step"><div class="sdot" id="sd4">4</div><div class="slbl" id="sl4">Confirmar</div></div>
     </div>
 
-    <!-- PASO 1 -->
+    <!-- PASO 1: Cliente -->
     <div class="card on" id="p1">
       <div class="sec"><i class="ti ti-building"></i> Identificación del cliente</div>
-      <div class="f" id="f-cuenta">
-        <label>Cuenta <span class="r">*</span></label>
-        <input type="text" id="cuenta" placeholder="Ej. Corporativo GS, test_1..." oninput="chk1()">
-        <div class="em">Campo requerido</div>
-      </div>
+
       <div class="f" id="f-cliente">
         <label>Cliente <span class="r">*</span></label>
         <div class="ac-wrap">
@@ -141,57 +126,80 @@
         <input type="hidden" id="cliSysId">
         <div class="em">Selecciona un cliente de la lista</div>
       </div>
+
+      <div class="f" id="f-cuenta">
+        <label>Cuenta</label>
+        <input type="text" id="cuenta" placeholder="Se auto-rellena al elegir cliente" readonly>
+        <div class="auto-badge" id="badge-cuenta"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado desde Excel</div>
+      </div>
+
+      <div class="g2">
+        <div class="f" id="f-pbx-disp">
+          <label>Tipo de PBX</label>
+          <input type="text" id="tipoPbxDisp" placeholder="Auto-rellena" readonly>
+          <div class="auto-badge" id="badge-pbx"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
+        </div>
+        <div class="f" id="f-paq-disp">
+          <label>Paquete</label>
+          <input type="text" id="paqueteDisp" placeholder="Auto-rellena" readonly>
+          <div class="auto-badge" id="badge-paq"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
+        </div>
+      </div>
+
       <div class="nav">
         <button class="bnx" id="b1n" onclick="ir(2)" disabled>Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>
     </div>
 
-    <!-- PASO 2 -->
+    <!-- PASO 2: Solución -->
     <div class="card" id="p2">
       <div class="sec"><i class="ti ti-tag"></i> Clasificación del caso</div>
-      <div class="g2">
-        <div class="f" id="f-pbx">
-          <label>Tipo de PBX <span class="r">*</span></label>
-          <select id="tipo_pbx" onchange="chk2()">
-            <option value="">— Selecciona —</option>
-            <option value="SYS_ONPREMISE">On Premise</option>
-            <option value="SYS_CLOUD">Cloud</option>
-          </select>
-          <div class="em">Requerido</div>
-        </div>
-        <div class="f" id="f-proyecto">
-          <label>Tipo de proyecto <span class="r">*</span></label>
-          <select id="tipo_proyecto" onchange="chk2()">
-            <option value="">— Selecciona —</option>
-            <option value="SYS_EKT">Paquete EKT</option>
-            <option value="SYS_TP">Paquetes TP</option>
-            <option value="SYS_TFE_TP">TFE TP</option>
-            <option value="SYS_TFE_GS">TFE GS</option>
-            <option value="SYS_TFE_VIP">TFE VIP</option>
-          </select>
-          <div class="em">Requerido</div>
-        </div>
-      </div>
-      <div class="f" id="f-paquete">
-        <label>Paquete <span class="r">*</span></label>
-        <select id="paquete" onchange="chk2()">
+
+      <div class="f" id="f-proyecto">
+        <label>Tipo de proyecto <span class="r">*</span></label>
+        <select id="tipo_proyecto" onchange="onProyecto()">
           <option value="">— Selecciona —</option>
+          <option value="8f3bf6a0876a3990935586ad0ebb35b5">Paquete EKT</option>
+          <option value="134bf6a0876a3990935586ad0ebb3582">Paquetes TP</option>
+          <option value="b26b7aa0876a3990935586ad0ebb35f9">TFE TP</option>
+          <option value="e98bbea0876a3990935586ad0ebb35c1">TFE GS</option>
+          <option value="e8ab7aa0876a3990935586ad0ebb35ac">TFE VIP</option>
         </select>
         <div class="em">Requerido</div>
       </div>
+
+      <div class="f" id="f-paquete">
+        <label>Paquete <span class="r" id="paq-req">*</span> <span class="locked" id="paq-locked" style="display:none">— No aplica para TFE</span></label>
+        <select id="paquete" onchange="chk2()">
+          <option value="">— Selecciona —</option>
+          <option value="SIP_004">SIP 04</option>
+          <option value="SIP_006">SIP 06</option>
+          <option value="SIP_008">SIP 08</option>
+          <option value="SIP_010">SIP 10</option>
+          <option value="SIP_020">SIP 20</option>
+          <option value="SIP_030">SIP 30</option>
+          <option value="SIP_060">SIP 60</option>
+          <option value="SIP_090">SIP 90</option>
+          <option value="SIP_120">SIP 120</option>
+          <option value="SIP_350">SIP 350</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+
       <div class="f" id="f-solucion">
         <label>Tipo de solución <span class="r">*</span></label>
         <select id="tipo_solucion" onchange="onSolucion()">
           <option value="">— Selecciona —</option>
-          <option value="SYS_AHEEVA">Aheeva</option>
-          <option value="SYS_CHATBOT">Chat bot</option>
-          <option value="SYS_HARDPHONE">Hardphone</option>
-          <option value="SYS_PBX">PBX</option>
-          <option value="SYS_PBXACT">PBXact</option>
-          <option value="SYS_SOFTPHONE">Softphone</option>
+          <option value="232071b587f2fd104432cbbd0ebb355d">AHEEVA</option>
+          <option value="6b2071b587f2fd104432cbbd0ebb355d">CHAT BOOT</option>
+          <option value="6f2071b587f2fd104432cbbd0ebb355c">PBX ACT</option>
+          <option value="a72071b587f2fd104432cbbd0ebb355d">HARDPHONE</option>
+          <option value="e32071b587f2fd104432cbbd0ebb355d">SOFTPHONE</option>
+          <option value="ef2071b587f2fd104432cbbd0ebb355b">PBX</option>
         </select>
         <div class="em">Requerido</div>
       </div>
+
       <div class="f" id="f-solicitud">
         <label>Solicitud <span class="r">*</span></label>
         <select id="solicitud" onchange="chk2()" disabled>
@@ -199,33 +207,37 @@
         </select>
         <div class="em">Requerido</div>
       </div>
+
       <div class="nav">
         <button class="bbk" onclick="ir(1)"><i class="ti ti-arrow-left"></i> Atrás</button>
         <button class="bnx" id="b2n" onclick="ir(3)" disabled>Siguiente <i class="ti ti-arrow-right"></i></button>
       </div>
     </div>
 
-    <!-- PASO 3 -->
+    <!-- PASO 3: Descripción e Impacto -->
     <div class="card" id="p3">
       <div class="sec"><i class="ti ti-alert-triangle"></i> Descripción e impacto</div>
+
       <div class="f" id="f-desc">
         <label>Descripción del problema <span class="r">*</span></label>
         <textarea id="descripcion" placeholder="Describe el problema o solicitud con detalle..." oninput="chk3()"></textarea>
         <div class="em">Agrega una descripción</div>
       </div>
+
       <div class="f" id="f-tiempo">
         <label>Tiempo promedio de atención <span class="r">*</span></label>
         <select id="tiempo" onchange="chk3()">
           <option value="">— Selecciona —</option>
-          <option value="SYS_30M">30 minutos</option>
-          <option value="SYS_60M">60 minutos</option>
-          <option value="SYS_120M">120 minutos</option>
-          <option value="SYS_240M">240 minutos</option>
-          <option value="SYS_480M">480 minutos</option>
-          <option value="SYS_1440M">1 día (1440 min)</option>
+          <option value="30">30 minutos</option>
+          <option value="60">60 minutos</option>
+          <option value="120">120 minutos</option>
+          <option value="240">240 minutos</option>
+          <option value="480">480 minutos</option>
+          <option value="1440">1 día (1440 min)</option>
         </select>
         <div class="em">Requerido</div>
       </div>
+
       <div class="f">
         <label>Impacto <span class="r">*</span></label>
         <div class="pills" id="grp-impacto">
@@ -235,6 +247,7 @@
         </div>
         <input type="hidden" id="impacto">
       </div>
+
       <div class="f">
         <label>Urgencia <span class="r">*</span></label>
         <div class="pills" id="grp-urgencia">
@@ -244,13 +257,14 @@
         </div>
         <input type="hidden" id="urgencia">
       </div>
+
       <div class="nav">
         <button class="bbk" onclick="ir(2)"><i class="ti ti-arrow-left"></i> Atrás</button>
         <button class="bnx" id="b3n" onclick="ir(4)" disabled>Revisar <i class="ti ti-eye"></i></button>
       </div>
     </div>
 
-    <!-- PASO 4 -->
+    <!-- PASO 4: Confirmar -->
     <div class="card" id="p4">
       <div class="sec"><i class="ti ti-clipboard-check"></i> Confirmación</div>
       <div class="prev" id="prevFinal"></div>
@@ -264,7 +278,7 @@
   </div>
 </div>
 
-<!-- Éxito -->
+<!-- Pantalla de éxito -->
 <div class="ok" id="okScreen">
   <i class="ti ti-circle-check"></i>
   <h2>Ticket creado</h2>
@@ -274,187 +288,422 @@
 </div>
 
 <script>
-  // ── CONFIGURACIÓN ── reemplaza con tu URL de n8n
-  const N8N_WEBHOOK = 'https://andrewcarpenter.app.n8n.cloud/webhook/0ff010f5-a98a-4434-bbc3-telegram';
+const N8N_WEBHOOK = 'https://andrewcarpenter.app.n8n.cloud/webhook/0ff010f5-a98a-4434-bbc3-telegram';
 
-  // Clientes (puedes cargar esto desde n8n en el futuro)
-  const CLIENTS = [
-    { name: 'Grupo Salinas', sys_id: '9e02123487652910935586ad0ebb35c7' },
-    { name: 'Televisa Univision', sys_id: 'aabb1234567890abcdef1234567890ab' },
-    { name: 'BBVA México', sys_id: 'bbcc2345678901bcdef2345678901bc' },
-    { name: 'Bimbo México', sys_id: 'ccdd3456789012cdef3456789012cd' },
-    { name: 'América Móvil', sys_id: 'ddee4567890123def4567890123de' },
-    { name: 'Cemex', sys_id: 'eeff5678901234ef5678901234ef56' },
-    { name: 'Elektra', sys_id: 'ffaa6789012345fa6789012345fa67' },
-    { name: 'Grupo Modelo', sys_id: 'aabb7890123456ab7890123456ab78' },
-    { name: 'Liverpool', sys_id: 'bbcc8901234567bc8901234567bc89' },
-    { name: 'Oxxo', sys_id: 'ccdd9012345678cd9012345678cd90' },
-  ];
+// ── TIPO PBX: mapeo texto Excel → sys_id ServiceNow ──
+const PBX_MAP = {
+  'On premise': { sys_id: 'e20afe20876a3990935586ad0ebb350b', label: 'On Premise' },
+  'Cloud':      { sys_id: '3c5aba60876a3990935586ad0ebb35b0', label: 'Cloud' },
+};
 
-  const SOL = {
-    SYS_AHEEVA:   [{ l: 'Configuración de agentes', v: 'SYS_AHE_01' }, { l: 'Falla de cola', v: 'SYS_AHE_02' }, { l: 'Reporte de campañas', v: 'SYS_AHE_03' }],
-    SYS_CHATBOT:  [{ l: 'Diseño de flujo', v: 'SYS_BOT_01' }, { l: 'Integración CRM', v: 'SYS_BOT_02' }, { l: 'Entrenamiento NLP', v: 'SYS_BOT_03' }],
-    SYS_HARDPHONE:[{ l: 'Registro de teléfono', v: 'SYS_HP_01' }, { l: 'Sin audio', v: 'SYS_HP_02' }, { l: 'Firmware', v: 'SYS_HP_03' }],
-    SYS_PBX:      [{ l: 'Caída de troncal SIP', v: 'SYS_PBX_01' }, { l: 'Fallo de extensión', v: 'SYS_PBX_02' }, { l: 'Error de enrutamiento', v: 'SYS_PBX_03' }, { l: 'IVR / Auto Attendant', v: 'SYS_PBX_04' }],
-    SYS_PBXACT:   [{ l: 'Instalación', v: 'SYS_PBXACT_01' }, { l: 'Licenciamiento', v: 'SYS_PBXACT_02' }, { l: 'Módulos FreePBX', v: 'SYS_PBXACT_03' }],
-    SYS_SOFTPHONE:[{ l: 'No registra', v: 'SYS_SP_01' }, { l: 'Problemas de audio', v: 'SYS_SP_02' }, { l: 'Configuración VPN', v: 'SYS_SP_03' }],
-  };
+// ── PAQUETE: mapeo texto Excel → value del select ──
+const PAQ_MAP = {
+  'SIP 04': 'SIP_004', 'SIP 06': 'SIP_006', 'SIP 08': 'SIP_008',
+  'SIP 10': 'SIP_010', 'SIP 20': 'SIP_020', 'SIP 30': 'SIP_030',
+  'SIP 60': 'SIP_060', 'SIP 90': 'SIP_090', 'SIP 120': 'SIP_120',
+  'SIP 350': 'SIP_350',
+};
 
-  // Poblar paquetes
+// ── TFE: proyectos que NO usan paquete ──
+const TFE_IDS = [
+  'b26b7aa0876a3990935586ad0ebb35f9',
+  'e98bbea0876a3990935586ad0ebb35c1',
+  'e8ab7aa0876a3990935586ad0ebb35ac',
+];
+
+// ── SOLICITUDES por tipo de solución (sys_ids reales) ──
+const SOL = {
+  '232071b587f2fd104432cbbd0ebb355d': [ // AHEEVA
+    { l:'ABC DE AUXILIARES', v:'094139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC DE AGENTE', v:'454139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC DE TRONCAL', v:'414139f587f2fd104432cbbd0ebb350b' },
+    { l:'ABC  DE SUPERVISORES', v:'8d4139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC GRUPO DE AGENTES', v:'4d4139f587f2fd104432cbbd0ebb350e' },
+    { l:'ABC DE DID', v:'c94139f587f2fd104432cbbd0ebb350a' },
+    { l:'CAPACITACIÓN  USUARIOS Y AGENTES', v:'0d4139f587f2fd104432cbbd0ebb350f' },
+    { l:'CHECK LIST DE CONFIGURACIONES', v:'054139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGUACIÓN DE COLA', v:'894139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN  ENVÍO DE CORREO ELECTRÓNICO', v:'814139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN BUZÓN DE VOZ', v:'4d4139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN CONDICIONES DE TIEMPO', v:'c54139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN DE CALL BACK', v:'014139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE CAMPAÑA ENTRANTE', v:'c14139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE CAMPAÑA SALIENTE', v:'854139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE COLING LIST', v:'494139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE COLA ENTRANTE', v:'0d4139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE DASHBOARD', v:'cd4139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE FORMULARIOS', v:'454139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE IVR', v:'094139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE LLAMADAS ENTRE AGENTES', v:'c94139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE SKILL', v:'414139f587f2fd104432cbbd0ebb350e' },
+    { l:'CONFIGURACIÓN PERFIL DE USUARIO', v:'8d4139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN SOCIAL MEDIA', v:'054139f587f2fd104432cbbd0ebb350e' },
+    { l:'DESARROLLO DE FUNCIONALIDAD PERSONALIZADA', v:'c54139f587f2fd104432cbbd0ebb350e' },
+    { l:'ENVÍO DE GRABACIONES DE LLAMADAS', v:'894139f587f2fd104432cbbd0ebb350e' },
+    { l:'MARCACIONES ESTATICAS', v:'c14139f587f2fd104432cbbd0ebb350f' },
+    { l:'REPORTES PERSONALIZADOS', v:'854139f587f2fd104432cbbd0ebb350f' },
+    { l:'TAREAS PROGRAMADAS', v:'494139f587f2fd104432cbbd0ebb350f' },
+    { l:'VENTANA DE MANTENIMIENTO PREVENTIVO', v:'014139f587f2fd104432cbbd0ebb350f' },
+  ],
+  '6b2071b587f2fd104432cbbd0ebb355d': [ // CHAT BOOT
+    { l:'ACTUALIZACIÓN BASE DE DATOS', v:'cd4139f587f2fd104432cbbd0ebb3512' },
+    { l:'ALTA DE BOOT', v:'c14139f587f2fd104432cbbd0ebb3512' },
+    { l:'BAJA DE BOOT', v:'494139f587f2fd104432cbbd0ebb3512' },
+    { l:'CAMBIO DE BOOT', v:'854139f587f2fd104432cbbd0ebb3512' },
+    { l:'CONFIGURACIÓN ABC DE AGENTE', v:'014139f587f2fd104432cbbd0ebb3512' },
+    { l:'DESARROLLO DE FUNCIONALIDAD PERSONALIZADA', v:'0d4139f587f2fd104432cbbd0ebb3512' },
+  ],
+  '6f2071b587f2fd104432cbbd0ebb355c': [ // PBX ACT
+    { l:'ABC DE EXTENSIÓN', v:'cd4139f587f2fd104432cbbd0ebb3509' },
+    { l:'ABC DE SUPERVISOR', v:'014139f587f2fd104432cbbd0ebb3509' },
+    { l:'ABC AGENTE', v:'054139f587f2fd104432cbbd0ebb3508' },
+    { l:'CAMBIO DE PASSWORD EN PANEL XACT VIEW', v:'894139f587f2fd104432cbbd0ebb3508' },
+    { l:'CAMBIO DE PERMISOS PARA LLAMADAS SALIENTES (CLASS OF SERVICE)', v:'4d4139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN  DASHBOARD', v:'414139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN ABC CAMPAÑA DE XACT VIEW', v:'854139f587f2fd104432cbbd0ebb3509' },
+    { l:'CONFIGURACIÓN COLA DE ATENCIÓN', v:'c54139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN DE BUZÓN DE VOZ', v:'814139f587f2fd104432cbbd0ebb350a' },
+    { l:'CONFIGURACIÓN DESVÍO DE LLAMADA', v:'0d4139f587f2fd104432cbbd0ebb3509' },
+    { l:'GENERAR PLANTILLAS PARA REPORTE DE CAMPAÑAS', v:'c14139f587f2fd104432cbbd0ebb3509' },
+    { l:'MARCACION PROGRESIVA', v:'494139f587f2fd104432cbbd0ebb3509' },
+  ],
+  'a72071b587f2fd104432cbbd0ebb355d': [ // HARDPHONE
+    { l:'ACTUALIZAR FIRMWARE', v:'8d4139f587f2fd104432cbbd0ebb3510' },
+    { l:'CAPACITACIÓN FUNCIONES DE HARDPFONE', v:'c94139f587f2fd104432cbbd0ebb3510' },
+    { l:'CONFIGURACION BOTONERA', v:'414139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACION DIRECTORIO', v:'c54139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACION EXTENSION', v:'054139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACIÓN HARDPHONE DEMO', v:'4d4139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACIÓN POSTVENTA', v:'894139f587f2fd104432cbbd0ebb3511' },
+  ],
+  'e32071b587f2fd104432cbbd0ebb355d': [ // SOFTPHONE
+    { l:'CAMBIO PASSWORD DE SOFTPHONE', v:'cd4139f587f2fd104432cbbd0ebb350f' },
+    { l:'CAPACITACIÓN USO DE SOFTPHONE', v:'094139f587f2fd104432cbbd0ebb3510' },
+    { l:'CONFIGURACION SOFTPHONE', v:'814139f587f2fd104432cbbd0ebb3510' },
+    { l:'LIBERACION DE LICENCIA SOFTPHONE', v:'454139f587f2fd104432cbbd0ebb3510' },
+  ],
+  'ef2071b587f2fd104432cbbd0ebb355b': [ // PBX
+    { l:'ABC DE EXTENSIÓN (PBX)', v:'014139f587f2fd104432cbbd0ebb3506' },
+    { l:'ACCESO USUARIO FINAL', v:'854139f587f2fd104432cbbd0ebb3503' },
+    { l:'AGREGAR NUMERO DIRECTO', v:'0d4139f587f2fd104432cbbd0ebb3503' },
+    { l:'ASIGNACIÓN CALLER ID', v:'814139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO DE DOMICILIO', v:'c94139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO DE IP PBX', v:'8d4139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO SEGMENTO DE TELÉFONOS', v:'cd4139f587f2fd104432cbbd0ebb3506' },
+    { l:'CAPACITACIÓN FUNCIONES DE PBX', v:'0d4139f587f2fd104432cbbd0ebb3502' },
+    { l:'CHECK LIST DE CONFIGURACIONES (PBX)', v:'cd4139f587f2fd104432cbbd0ebb3503' },
+    { l:'CONFIGURACIÓN ANUNCIO', v:'094139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN BLACKLIST', v:'c94139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN BUZÓN DE VOZ (PBX)', v:'8d4139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN CLAVE TELEFÓNICA', v:'414139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN COLA DE ATENCIÓN (PBX)', v:'054139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN CONDICIONES DE TIEMPO (PBX)', v:'814139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN DE HORARIO', v:'c14139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN DESVÍO DE LLAMADA (PBX)', v:'454139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN GRUPO DE CAPTURA', v:'854139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN GRUPO DE TIMBRADO', v:'494139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN GRUPO DE VOCEO', v:'014139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN IVR (PBX)', v:'c54139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN MARCACION RÁPIDA', v:'0d4139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN MÚSICA EN ESPERA', v:'894139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN SALA DE CONFERENCIA', v:'4d4139f587f2fd104432cbbd0ebb3505' },
+    { l:'INTERCONEXION ENTRE SITIOS', v:'454139f587f2fd104432cbbd0ebb3507' },
+    { l:'LIBERACIÓN DE ACCESO PBX Y TELÉFONOS', v:'494139f587f2fd104432cbbd0ebb3503' },
+    { l:'REPORTE DE LLAMADAS CDR', v:'c14139f587f2fd104432cbbd0ebb3503' },
+    { l:'VENTANA DE MANTENIMIENTO PREVENTIVA (PBX)', v:'094139f587f2fd104432cbbd0ebb3507' },
+  ],
+};
+
+// ── CLIENTES (1,814 reales de ServiceNow + datos del Excel) ──
+// NOTA: lista completa se inserta aquí — por ahora muestra de ejemplo
+// Reemplazar CLIENTS con el array generado por el conversor + cruce Excel
+const CLIENTS = [
+  { name:'SONNE ENERGETICOS SA DE CV', sys_id:'4a12963487652910935586ad0ebb354a', number:'ACCT0011726', cuenta:'200036323', tipo_pbx:'On premise', paquete:'SIP 20' },
+  { name:'DANTE DAVID GARCIA GONZALEZ', sys_id:'b8029ef087652910935586ad0ebb35c9', number:'ACCT0010639', cuenta:'200363753', tipo_pbx:'Cloud', paquete:'SIP 06' },
+  { name:'COMERCIALIZADORA SOLUCIONES LUMINICAS PLUS SA DE CV', sys_id:'50025ef087652910935586ad0ebb35e6', number:'ACCT0010528', cuenta:'200378524', tipo_pbx:'Cloud', paquete:'SIP 06' },
+  { name:'MOTO GALERIA SA DE CV', sys_id:'8c12d23487652910935586ad0ebb3573', number:'ACCT0011316', cuenta:'', tipo_pbx:'', paquete:'' },
+  { name:'RESTAURANTE LA POLAR SA DE CV', sys_id:'5d12563487652910935586ad0ebb353d', number:'ACCT0011576', cuenta:'200130770', tipo_pbx:'Cloud', paquete:'SIP 10' },
+  { name:'FERRETERIA LA FRAGUA SA DE CV', sys_id:'6d02def087652910935586ad0ebb35f0', number:'ACCT0010808', cuenta:'', tipo_pbx:'', paquete:'' },
+  { name:'TUBULARES Y ACEROS DE GUADALUPE SA DE CV', sys_id:'6a12d63487652910935586ad0ebb3545', number:'ACCT0011845', cuenta:'200432048', tipo_pbx:'Cloud', paquete:'SIP 10' },
+  { name:'TOTALPLAY TELECOMUNICACIONES SA DE CV', sys_id:'5a12963487652910935586ad0ebb35ea', number:'ACCT0011815', cuenta:'200405331', tipo_pbx:'On premise', paquete:'SIP 04' },
+  { name:'TRANSPORTE DE PERSONAL JOSELYN SA DE CV', sys_id:'5612963487652910935586ad0ebb35f8', number:'ACCT0011825', cuenta:'200049312', tipo_pbx:'On premise', paquete:'SIP 20' },
+  { name:'PLASTITOSA', sys_id:'fc12163487652910935586ad0ebb357d', number:'ACCT0011455', cuenta:'200409766', tipo_pbx:'On premise', paquete:'SIP 04' },
+  // ↑ Reemplazar con el array completo de 1,814 clientes cruzado con el Excel
+];
+
+// ── Estado ──
+let cur = 1, cliOk = false;
+let cliData = {}; // datos del cliente seleccionado
+
+// ── Stepper ──
+function updStepper() {
+  [1,2,3,4].forEach(i => {
+    const d = document.getElementById('sd'+i), l = document.getElementById('sl'+i);
+    d.classList.remove('active','done'); l.classList.remove('active');
+    if (i < cur) { d.classList.add('done'); d.innerHTML = '<i class="ti ti-check" style="font-size:11px"></i>'; }
+    else if (i === cur) { d.classList.add('active'); d.textContent = i; l.classList.add('active'); }
+    else d.textContent = i;
+  });
+}
+
+function ir(n) {
+  document.getElementById('p'+cur).classList.remove('on');
+  cur = n;
+  document.getElementById('p'+n).classList.add('on');
+  updStepper();
+  if (n === 4) buildPrev();
+}
+
+// ── PASO 1: Autocomplete cliente ──
+function buscarCliente() {
+  const q = document.getElementById('cliSearch').value.trim().toLowerCase();
+  cliOk = false;
+  document.getElementById('cliSysId').value = '';
+  limpiarAutoFill();
+  const list = document.getElementById('acList');
+  if (q.length < 2) { list.style.display = 'none'; chk1(); return; }
+  const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q)).slice(0, 30);
+  list.innerHTML = m.length
+    ? m.map(c => {
+        const sub = c.cuenta ? `<div class="ac-sub">Cuenta ${c.cuenta} · ${c.tipo_pbx || ''} · ${c.paquete || ''}</div>` : '';
+        return `<div class="ac-item" onclick="pickCli('${c.sys_id}','${c.name}','${c.cuenta}','${c.tipo_pbx}','${c.paquete}')">${c.name}${sub}</div>`;
+      }).join('')
+    : '<div class="ac-empty">Sin resultados</div>';
+  list.style.display = 'block';
+  chk1();
+}
+
+function pickCli(sid, name, cuenta, tipoPbx, paquete) {
+  document.getElementById('cliSearch').value = name;
+  document.getElementById('cliSysId').value = sid;
+  document.getElementById('acList').style.display = 'none';
+  cliData = { sid, name, cuenta, tipoPbx, paquete };
+  cliOk = true;
+
+  // Auto-rellenar cuenta
+  const cuentaEl = document.getElementById('cuenta');
+  cuentaEl.value = cuenta || '';
+  if (cuenta) {
+    cuentaEl.classList.add('auto');
+    document.getElementById('badge-cuenta').classList.add('show');
+  }
+
+  // Auto-rellenar tipo PBX (solo display en paso 1)
+  const pbxDisp = document.getElementById('tipoPbxDisp');
+  pbxDisp.value = tipoPbx ? (PBX_MAP[tipoPbx]?.label || tipoPbx) : '';
+  if (tipoPbx) {
+    pbxDisp.classList.add('auto');
+    document.getElementById('badge-pbx').classList.add('show');
+  }
+
+  // Auto-rellenar paquete (solo display en paso 1)
+  const paqDisp = document.getElementById('paqueteDisp');
+  paqDisp.value = paquete || '';
+  if (paquete) {
+    paqDisp.classList.add('auto');
+    document.getElementById('badge-paq').classList.add('show');
+  }
+
+  chk1();
+}
+
+function limpiarAutoFill() {
+  cliData = {};
+  ['cuenta','tipoPbxDisp','paqueteDisp'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.classList.remove('auto');
+  });
+  ['badge-cuenta','badge-pbx','badge-paq'].forEach(id => {
+    document.getElementById(id).classList.remove('show');
+  });
+}
+
+function chk1() {
+  document.getElementById('b1n').disabled = !cliOk;
+}
+
+// ── Al entrar al paso 2: pre-seleccionar tipo PBX y paquete si vienen del Excel ──
+function ir(n) {
+  document.getElementById('p'+cur).classList.remove('on');
+  cur = n;
+  document.getElementById('p'+n).classList.add('on');
+  updStepper();
+
+  if (n === 2) preseleccionarPaso2();
+  if (n === 4) buildPrev();
+}
+
+function preseleccionarPaso2() {
+  // Pre-seleccionar tipo PBX si viene del Excel
+  if (cliData.tipoPbx && PBX_MAP[cliData.tipoPbx]) {
+    // El tipo_pbx se envía como hidden — se usa sys_id directamente
+  }
+
+  // Pre-seleccionar paquete si viene del Excel
+  if (cliData.paquete && PAQ_MAP[cliData.paquete]) {
+    const paqSel = document.getElementById('paquete');
+    paqSel.value = PAQ_MAP[cliData.paquete];
+  }
+
+  chk2();
+}
+
+// ── PASO 2: Lógica tipo proyecto → bloquear paquete en TFE ──
+function onProyecto() {
+  const val = document.getElementById('tipo_proyecto').value;
+  const esTFE = TFE_IDS.includes(val);
   const paqSel = document.getElementById('paquete');
-  for (let i = 4; i <= 350; i += 4) {
-    const o = document.createElement('option');
-    o.value = 'SYS_SIP_' + i;
-    o.textContent = 'SIP_' + String(i).padStart(3, '0');
-    paqSel.appendChild(o);
-  }
+  const paqReq = document.getElementById('paq-req');
+  const paqLocked = document.getElementById('paq-locked');
 
-  let cur = 1, cliOk = false;
-
-  function ir(n) {
-    document.getElementById('p' + cur).classList.remove('on');
-    cur = n;
-    document.getElementById('p' + n).classList.add('on');
-    updStepper();
-    if (n === 4) buildPrev();
-  }
-
-  function updStepper() {
-    [1, 2, 3, 4].forEach(i => {
-      const d = document.getElementById('sd' + i), l = document.getElementById('sl' + i);
-      d.classList.remove('active', 'done'); l.classList.remove('active');
-      if (i < cur) { d.classList.add('done'); d.innerHTML = '<i class="ti ti-check" style="font-size:11px"></i>'; }
-      else if (i === cur) { d.classList.add('active'); d.textContent = i; l.classList.add('active'); }
-      else d.textContent = i;
-    });
-  }
-
-  function buscarCliente() {
-    const q = document.getElementById('cliSearch').value.trim().toLowerCase();
-    cliOk = false; document.getElementById('cliSysId').value = '';
-    const list = document.getElementById('acList');
-    if (q.length < 2) { list.style.display = 'none'; chk1(); return; }
-    const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q));
-    list.innerHTML = m.length
-      ? m.map(c => `<div class="ac-item" onclick="pickCli('${c.sys_id}','${c.name}')">${c.name}</div>`).join('')
-      : '<div class="ac-empty">Sin resultados — n8n buscará en ServiceNow</div>';
-    list.style.display = 'block';
-    chk1();
-  }
-
-  function pickCli(sid, name) {
-    document.getElementById('cliSearch').value = name;
-    document.getElementById('cliSysId').value = sid;
-    document.getElementById('acList').style.display = 'none';
-    cliOk = true; chk1();
-  }
-
-  function chk1() {
-    document.getElementById('b1n').disabled = !(document.getElementById('cuenta').value.trim() && cliOk);
-  }
-
-  function onSolucion() {
-    const s = document.getElementById('tipo_solucion').value;
-    const sel = document.getElementById('solicitud');
-    sel.innerHTML = '<option value="">— Selecciona —</option>';
-    if (s && SOL[s]) { SOL[s].forEach(x => { const o = document.createElement('option'); o.value = x.v; o.textContent = x.l; sel.appendChild(o); }); sel.disabled = false; }
-    else sel.disabled = true;
-    chk2();
-  }
-
-  function chk2() {
-    const ok = ['tipo_pbx', 'tipo_proyecto', 'paquete', 'tipo_solucion', 'solicitud'].every(id => document.getElementById(id).value);
-    document.getElementById('b2n').disabled = !ok;
-  }
-
-  function pill(campo, val, nivel, el) {
-    document.getElementById('grp-' + campo).querySelectorAll('.pill').forEach(p => p.className = 'pill');
-    el.className = 'pill ' + nivel;
-    document.getElementById(campo).value = val;
-    chk3();
-  }
-
-  function chk3() {
-    const ok = document.getElementById('descripcion').value.trim()
-      && document.getElementById('tiempo').value
-      && document.getElementById('impacto').value
-      && document.getElementById('urgencia').value;
-    document.getElementById('b3n').disabled = !ok;
-  }
-
-  function lbl(id) { const e = document.getElementById(id); return e.tagName === 'SELECT' ? e.options[e.selectedIndex]?.text || '' : e.value; }
-  function pillLbl(c) { return document.getElementById('grp-' + c).querySelector('.pill.bajo,.pill.medio,.pill.alto')?.textContent || ''; }
-
-  function buildPrev() {
-    const rows = [
-      ['Cuenta', lbl('cuenta')],
-      ['Cliente', lbl('cliSearch')],
-      ['Tipo de PBX', lbl('tipo_pbx')],
-      ['Tipo de proyecto', lbl('tipo_proyecto')],
-      ['Paquete', lbl('paquete')],
-      ['Tipo de solución', lbl('tipo_solucion')],
-      ['Solicitud', lbl('solicitud')],
-      ['Descripción', document.getElementById('descripcion').value.trim()],
-      ['Tiempo promedio', lbl('tiempo')],
-      ['Impacto', pillLbl('impacto')],
-      ['Urgencia', pillLbl('urgencia')],
-    ];
-    document.getElementById('prevFinal').innerHTML =
-      '<h3><i class="ti ti-clipboard-list"></i> Resumen del ticket</h3>' +
-      rows.map(([k, v]) => `<div class="prow"><span class="pk">${k}</span><span class="pv">${v || '—'}</span></div>`).join('');
-  }
-
-  async function enviar() {
-    const btn = document.getElementById('bsend');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spin"></span> Enviando...';
-
-    const payload = {
-      sysparm_quantity: 1,
-      telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || 'desconocido',
-      variables: {
-        cuenta: document.getElementById('cuenta').value.trim(),
-        cliente: document.getElementById('cliSysId').value,
-        tipo_de_pbx: document.getElementById('tipo_pbx').value,
-        tipo_de_proyecto: document.getElementById('tipo_proyecto').value,
-        paquete: document.getElementById('paquete').value,
-        tipo_de_solucion: document.getElementById('tipo_solucion').value,
-        solicitud: document.getElementById('solicitud').value,
-        ci_relacionado: 'O00018',
-        descripcion_general: document.getElementById('descripcion').value.trim(),
-        tiempo_promedio: lbl('tiempo'),
-        urgencia: document.getElementById('urgencia').value,
-        impacto: document.getElementById('impacto').value,
-      }
-    };
-
-    try {
-      const res = await fetch(N8N_WEBHOOK, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      document.getElementById('mainWrap').style.display = 'none';
-      document.getElementById('okScreen').style.display = 'block';
-      document.getElementById('tnum').textContent = data.ticket_number || 'INC' + Math.floor(Math.random() * 9000000 + 1000000);
-      if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
-    } catch (e) {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="ti ti-send"></i> Reintentar';
-      alert('Error al enviar. Verifica tu conexión.');
+  if (esTFE) {
+    paqSel.value = '';
+    paqSel.disabled = true;
+    paqReq.style.display = 'none';
+    paqLocked.style.display = 'inline';
+  } else {
+    paqSel.disabled = false;
+    paqReq.style.display = 'inline';
+    paqLocked.style.display = 'none';
+    // Re-aplicar auto-relleno si hay dato del Excel
+    if (cliData.paquete && PAQ_MAP[cliData.paquete]) {
+      paqSel.value = PAQ_MAP[cliData.paquete];
     }
   }
+  chk2();
+}
 
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.ac-wrap')) document.getElementById('acList').style.display = 'none';
-  });
-
-  // Inicializar Telegram Web App
-  if (window.Telegram?.WebApp) {
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.expand();
+function onSolucion() {
+  const s = document.getElementById('tipo_solucion').value;
+  const sel = document.getElementById('solicitud');
+  sel.innerHTML = '<option value="">— Selecciona —</option>';
+  if (s && SOL[s]) {
+    SOL[s].forEach(x => {
+      const o = document.createElement('option');
+      o.value = x.v; o.textContent = x.l;
+      sel.appendChild(o);
+    });
+    sel.disabled = false;
+  } else {
+    sel.disabled = true;
   }
+  chk2();
+}
+
+function chk2() {
+  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
+  const camposReq = ['tipo_proyecto', 'tipo_solucion', 'solicitud'];
+  if (!esTFE) camposReq.push('paquete');
+  const ok = camposReq.every(id => document.getElementById(id).value);
+  document.getElementById('b2n').disabled = !ok;
+}
+
+// ── PASO 3 ──
+function pill(campo, val, nivel, el) {
+  document.getElementById('grp-'+campo).querySelectorAll('.pill').forEach(p => p.className = 'pill');
+  el.className = 'pill ' + nivel;
+  document.getElementById(campo).value = val;
+  chk3();
+}
+
+function chk3() {
+  const ok = document.getElementById('descripcion').value.trim()
+    && document.getElementById('tiempo').value
+    && document.getElementById('impacto').value
+    && document.getElementById('urgencia').value;
+  document.getElementById('b3n').disabled = !ok;
+}
+
+// ── PASO 4: Preview ──
+function lbl(id) {
+  const e = document.getElementById(id);
+  if (!e) return '';
+  return e.tagName === 'SELECT' ? (e.options[e.selectedIndex]?.text || '') : e.value;
+}
+function pillLbl(c) {
+  return document.getElementById('grp-'+c).querySelector('.pill.bajo,.pill.medio,.pill.alto')?.textContent || '';
+}
+
+function buildPrev() {
+  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
+  const tipoPbxLabel = cliData.tipoPbx ? (PBX_MAP[cliData.tipoPbx]?.label || cliData.tipoPbx) : '—';
+
+  const rows = [
+    ['Cliente', lbl('cliSearch')],
+    ['Cuenta', lbl('cuenta'), !!cliData.cuenta],
+    ['Tipo de PBX', tipoPbxLabel, !!cliData.tipoPbx],
+    ['Tipo de proyecto', lbl('tipo_proyecto')],
+    !esTFE ? ['Paquete', lbl('paquete'), !!cliData.paquete] : null,
+    ['Tipo de solución', lbl('tipo_solucion')],
+    ['Solicitud', lbl('solicitud')],
+    ['Descripción', document.getElementById('descripcion').value.trim()],
+    ['Tiempo promedio', lbl('tiempo') + ' min'],
+    ['Impacto', pillLbl('impacto')],
+    ['Urgencia', pillLbl('urgencia')],
+  ].filter(Boolean);
+
+  document.getElementById('prevFinal').innerHTML =
+    '<h3><i class="ti ti-clipboard-list"></i> Resumen del ticket</h3>' +
+    rows.map(([k, v, isAuto]) =>
+      `<div class="prow"><span class="pk">${k}</span><span class="pv${isAuto?' auto-val':''}">${v || '—'}</span></div>`
+    ).join('');
+}
+
+// ── Enviar ──
+async function enviar() {
+  const btn = document.getElementById('bsend');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Enviando...';
+
+  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
+  const tipoPbxSysId = cliData.tipoPbx ? (PBX_MAP[cliData.tipoPbx]?.sys_id || '') : '';
+
+  const payload = {
+    sysparm_quantity: 1,
+    telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || 'desconocido',
+    variables: {
+      cuenta: document.getElementById('cuenta').value.trim(),
+      cliente: document.getElementById('cliSysId').value,
+      tipo_de_pbx: tipoPbxSysId,
+      tipo_de_proyecto: document.getElementById('tipo_proyecto').value,
+      paquete: esTFE ? '' : document.getElementById('paquete').value,
+      tipo_de_solucion: document.getElementById('tipo_solucion').value,
+      solicitud: document.getElementById('solicitud').value,
+      ci_relacionado: 'O00018',
+      descripcion_general: document.getElementById('descripcion').value.trim(),
+      tiempo_promedio: document.getElementById('tiempo').value,
+      urgencia: document.getElementById('urgencia').value,
+      impacto: document.getElementById('impacto').value,
+    }
+  };
+
+  try {
+    const res = await fetch(N8N_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    document.getElementById('mainWrap').style.display = 'none';
+    document.getElementById('okScreen').style.display = 'block';
+    document.getElementById('tnum').textContent = data.ticket_number || 'REQ' + Math.floor(Math.random()*9000000+1000000);
+    if (window.Telegram?.WebApp) window.Telegram.WebApp.close();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-send"></i> Reintentar';
+    alert('Error al enviar. Verifica tu conexión.');
+  }
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ac-wrap')) document.getElementById('acList').style.display = 'none';
+});
+
+if (window.Telegram?.WebApp) {
+  window.Telegram.WebApp.ready();
+  window.Telegram.WebApp.expand();
+}
 </script>
 </body>
 </html>
