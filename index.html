@@ -290,7 +290,34 @@
 <script>
 const N8N_WEBHOOK = 'https://andrewcarpenter.app.n8n.cloud/webhook/0ff010f5-a98a-4434-bbc3-telegram';
 
+// ── CLIENTES: carga diferida desde clientes.js ──
+let CLIENTS = [];
+let clientesListos = false;
 
+function cargarClientes() {
+  const inp = document.getElementById('cliSearch');
+  inp.placeholder = '⏳ Cargando clientes...';
+  inp.disabled = true;
+  const s = document.createElement('script');
+  s.src = 'clientes.js?v=' + Date.now();
+  s.onload = function() {
+    if (window.CLIENTES_DATA && window.CLIENTES_DATA.length) {
+      CLIENTS = window.CLIENTES_DATA;
+      console.log('StarkPBX: ' + CLIENTS.length + ' clientes cargados');
+    }
+    clientesListos = true;
+    inp.placeholder = 'Escribe nombre del cliente...';
+    inp.disabled = false;
+    inp.focus && inp.focus();
+  };
+  s.onerror = function() {
+    clientesListos = true;
+    inp.placeholder = 'Escribe nombre del cliente...';
+    inp.disabled = false;
+    console.error('StarkPBX: Error cargando clientes.js');
+  };
+  document.head.appendChild(s);
+}
 
 // ── Estado ──
 let cur = 1, cliOk = false;
@@ -305,14 +332,6 @@ function updStepper() {
     else if (i === cur) { d.classList.add('active'); d.textContent = i; l.classList.add('active'); }
     else d.textContent = i;
   });
-}
-
-function ir(n) {
-  document.getElementById('p'+cur).classList.remove('on');
-  cur = n;
-  document.getElementById('p'+n).classList.add('on');
-  updStepper();
-  if (n === 4) buildPrev();
 }
 
 // ── PASO 1: Autocomplete cliente ──
