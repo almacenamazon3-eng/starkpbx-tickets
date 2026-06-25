@@ -323,6 +323,132 @@ function cargarClientes() {
 let cur = 1, cliOk = false;
 let cliData = {}; // datos del cliente seleccionado
 
+// ── TIPO PBX: texto Excel → sys_id ServiceNow ──
+const PBX_MAP = {
+  'On premise': { sys_id: 'e20afe20876a3990935586ad0ebb350b', label: 'On Premise' },
+  'Cloud':      { sys_id: '3c5aba60876a3990935586ad0ebb35b0', label: 'Cloud' },
+};
+
+// ── PAQUETE: texto Excel → value del select ──
+const PAQ_MAP = {
+  'SIP 04': 'SIP_004', 'SIP 06': 'SIP_006', 'SIP 08': 'SIP_008',
+  'SIP 10': 'SIP_010', 'SIP 20': 'SIP_020', 'SIP 30': 'SIP_030',
+  'SIP 60': 'SIP_060', 'SIP 90': 'SIP_090', 'SIP 120': 'SIP_120',
+  'SIP 350': 'SIP_350',
+};
+
+// ── TFE: proyectos que NO usan paquete ──
+const TFE_IDS = [
+  'b26b7aa0876a3990935586ad0ebb35f9',
+  'e98bbea0876a3990935586ad0ebb35c1',
+  'e8ab7aa0876a3990935586ad0ebb35ac',
+];
+
+// ── SOLICITUDES por tipo de solución (sys_ids reales) ──
+const SOL = {
+  '232071b587f2fd104432cbbd0ebb355d': [ // AHEEVA (30)
+    { l:'ABC DE AUXILIARES', v:'094139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC DE AGENTE', v:'454139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC DE TRONCAL', v:'414139f587f2fd104432cbbd0ebb350b' },
+    { l:'ABC DE SUPERVISORES', v:'8d4139f587f2fd104432cbbd0ebb350a' },
+    { l:'ABC GRUPO DE AGENTES', v:'4d4139f587f2fd104432cbbd0ebb350e' },
+    { l:'ABC DE DID', v:'c94139f587f2fd104432cbbd0ebb350a' },
+    { l:'CAPACITACIÓN USUARIOS Y AGENTES', v:'0d4139f587f2fd104432cbbd0ebb350f' },
+    { l:'CHECK LIST DE CONFIGURACIONES', v:'054139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGUACIÓN DE COLA', v:'894139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN ENVÍO DE CORREO ELECTRÓNICO', v:'814139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN BUZÓN DE VOZ', v:'4d4139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN CONDICIONES DE TIEMPO', v:'c54139f587f2fd104432cbbd0ebb350b' },
+    { l:'CONFIGURACIÓN DE CALL BACK', v:'014139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE CAMPAÑA ENTRANTE', v:'c14139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE CAMPAÑA SALIENTE', v:'854139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE COLING LIST', v:'494139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE COLA ENTRANTE', v:'0d4139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE DASHBOARD', v:'cd4139f587f2fd104432cbbd0ebb350c' },
+    { l:'CONFIGURACIÓN DE FORMULARIOS', v:'454139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE IVR', v:'094139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE LLAMADAS ENTRE AGENTES', v:'c94139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN DE SKILL', v:'414139f587f2fd104432cbbd0ebb350e' },
+    { l:'CONFIGURACIÓN PERFIL DE USUARIO', v:'8d4139f587f2fd104432cbbd0ebb350d' },
+    { l:'CONFIGURACIÓN SOCIAL MEDIA', v:'054139f587f2fd104432cbbd0ebb350e' },
+    { l:'DESARROLLO DE FUNCIONALIDAD PERSONALIZADA', v:'c54139f587f2fd104432cbbd0ebb350e' },
+    { l:'ENVÍO DE GRABACIONES DE LLAMADAS', v:'894139f587f2fd104432cbbd0ebb350e' },
+    { l:'MARCACIONES ESTATICAS', v:'c14139f587f2fd104432cbbd0ebb350f' },
+    { l:'REPORTES PERSONALIZADOS', v:'854139f587f2fd104432cbbd0ebb350f' },
+    { l:'TAREAS PROGRAMADAS', v:'494139f587f2fd104432cbbd0ebb350f' },
+    { l:'VENTANA DE MANTENIMIENTO PREVENTIVO', v:'014139f587f2fd104432cbbd0ebb350f' },
+  ],
+  '6b2071b587f2fd104432cbbd0ebb355d': [ // CHAT BOOT (6)
+    { l:'ACTUALIZACIÓN BASE DE DATOS', v:'cd4139f587f2fd104432cbbd0ebb3512' },
+    { l:'ALTA DE BOOT', v:'c14139f587f2fd104432cbbd0ebb3512' },
+    { l:'BAJA DE BOOT', v:'494139f587f2fd104432cbbd0ebb3512' },
+    { l:'CAMBIO DE BOOT', v:'854139f587f2fd104432cbbd0ebb3512' },
+    { l:'CONFIGURACIÓN ABC DE AGENTE', v:'014139f587f2fd104432cbbd0ebb3512' },
+    { l:'DESARROLLO DE FUNCIONALIDAD PERSONALIZADA', v:'0d4139f587f2fd104432cbbd0ebb3512' },
+  ],
+  '6f2071b587f2fd104432cbbd0ebb355c': [ // PBX ACT (12)
+    { l:'ABC DE EXTENSIÓN', v:'cd4139f587f2fd104432cbbd0ebb3509' },
+    { l:'ABC DE SUPERVISOR', v:'014139f587f2fd104432cbbd0ebb3509' },
+    { l:'ABC AGENTE', v:'054139f587f2fd104432cbbd0ebb3508' },
+    { l:'CAMBIO DE PASSWORD EN PANEL XACT VIEW', v:'894139f587f2fd104432cbbd0ebb3508' },
+    { l:'CAMBIO DE PERMISOS PARA LLAMADAS SALIENTES (CLASS OF SERVICE)', v:'4d4139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN DASHBOARD', v:'414139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN ABC CAMPAÑA DE XACT VIEW', v:'854139f587f2fd104432cbbd0ebb3509' },
+    { l:'CONFIGURACIÓN COLA DE ATENCIÓN', v:'c54139f587f2fd104432cbbd0ebb3508' },
+    { l:'CONFIGURACIÓN DE BUZÓN DE VOZ', v:'814139f587f2fd104432cbbd0ebb350a' },
+    { l:'CONFIGURACIÓN DESVÍO DE LLAMADA', v:'0d4139f587f2fd104432cbbd0ebb3509' },
+    { l:'GENERAR PLANTILLAS PARA REPORTE DE CAMPAÑAS', v:'c14139f587f2fd104432cbbd0ebb3509' },
+    { l:'MARCACION PROGRESIVA', v:'494139f587f2fd104432cbbd0ebb3509' },
+  ],
+  'a72071b587f2fd104432cbbd0ebb355d': [ // HARDPHONE (7)
+    { l:'ACTUALIZAR FIRMWARE', v:'8d4139f587f2fd104432cbbd0ebb3510' },
+    { l:'CAPACITACIÓN FUNCIONES DE HARDPHONE', v:'c94139f587f2fd104432cbbd0ebb3510' },
+    { l:'CONFIGURACION BOTONERA', v:'414139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACION DIRECTORIO', v:'c54139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACION EXTENSION', v:'054139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACIÓN HARDPHONE DEMO', v:'4d4139f587f2fd104432cbbd0ebb3511' },
+    { l:'CONFIGURACIÓN POSTVENTA', v:'894139f587f2fd104432cbbd0ebb3511' },
+  ],
+  'e32071b587f2fd104432cbbd0ebb355d': [ // SOFTPHONE (4)
+    { l:'CAMBIO PASSWORD DE SOFTPHONE', v:'cd4139f587f2fd104432cbbd0ebb350f' },
+    { l:'CAPACITACIÓN USO DE SOFTPHONE', v:'094139f587f2fd104432cbbd0ebb3510' },
+    { l:'CONFIGURACION SOFTPHONE', v:'814139f587f2fd104432cbbd0ebb3510' },
+    { l:'LIBERACION DE LICENCIA SOFTPHONE', v:'454139f587f2fd104432cbbd0ebb3510' },
+  ],
+  'ef2071b587f2fd104432cbbd0ebb355b': [ // PBX (26)
+    { l:'ABC DE EXTENSIÓN', v:'014139f587f2fd104432cbbd0ebb3506' },
+    { l:'ACCESO USUARIO FINAL', v:'854139f587f2fd104432cbbd0ebb3503' },
+    { l:'AGREGAR NUMERO DIRECTO', v:'0d4139f587f2fd104432cbbd0ebb3503' },
+    { l:'ASIGNACIÓN CALLER ID', v:'814139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO DE DOMICILIO', v:'c94139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO DE IP PBX', v:'8d4139f587f2fd104432cbbd0ebb3507' },
+    { l:'CAMBIO SEGMENTO DE TELÉFONOS', v:'cd4139f587f2fd104432cbbd0ebb3506' },
+    { l:'CAPACITACIÓN FUNCIONES DE PBX', v:'0d4139f587f2fd104432cbbd0ebb3502' },
+    { l:'CHECK LIST DE CONFIGURACIONES', v:'cd4139f587f2fd104432cbbd0ebb3503' },
+    { l:'CONFIGURACIÓN ANUNCIO', v:'094139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN BLACKLIST', v:'c94139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN BUZÓN DE VOZ', v:'8d4139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN CLAVE TELEFÓNICA', v:'414139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN COLA DE ATENCIÓN', v:'054139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN CONDICIONES DE TIEMPO', v:'814139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN DE HORARIO', v:'c14139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN DESVÍO DE LLAMADA', v:'454139f587f2fd104432cbbd0ebb3504' },
+    { l:'CONFIGURACIÓN GRUPO DE CAPTURA', v:'854139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN GRUPO DE TIMBRADO', v:'494139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN GRUPO DE VOCEO', v:'014139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN IVR', v:'c54139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN MARCACION RÁPIDA', v:'0d4139f587f2fd104432cbbd0ebb3506' },
+    { l:'CONFIGURACIÓN MÚSICA EN ESPERA', v:'894139f587f2fd104432cbbd0ebb3505' },
+    { l:'CONFIGURACIÓN SALA DE CONFERENCIA', v:'4d4139f587f2fd104432cbbd0ebb3505' },
+    { l:'INTERCONEXION ENTRE SITIOS', v:'454139f587f2fd104432cbbd0ebb3507' },
+    { l:'LIBERACIÓN DE ACCESO PBX Y TELÉFONOS', v:'494139f587f2fd104432cbbd0ebb3503' },
+    { l:'REPORTE DE LLAMADAS CDR', v:'c14139f587f2fd104432cbbd0ebb3503' },
+    { l:'VENTANA DE MANTENIMIENTO PREVENTIVA', v:'094139f587f2fd104432cbbd0ebb3507' },
+  ],
+};
+
+
+
 // ── Stepper ──
 function updStepper() {
   [1,2,3,4].forEach(i => {
@@ -348,12 +474,24 @@ function buscarCliente() {
     return;
   }
   const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q)).slice(0, 30);
-  list.innerHTML = m.length
-    ? m.map(c => {
-        const sub = c.cuenta ? `<div class="ac-sub">Cuenta ${c.cuenta} · ${c.tipo_pbx || ''} · ${c.paquete || ''}</div>` : '';
-        return `<div class="ac-item" onclick="pickCli('${c.sys_id}','${c.name}','${c.cuenta}','${c.tipo_pbx}','${c.paquete}')">${c.name}${sub}</div>`;
-      }).join('')
-    : '<div class="ac-empty">Sin resultados</div>';
+  if (!m.length) {
+    list.innerHTML = '<div class="ac-empty">Sin resultados</div>';
+    list.style.display = 'block';
+    chk1();
+    return;
+  }
+  list.innerHTML = '';
+  m.forEach(function(c) {
+    const div = document.createElement('div');
+    div.className = 'ac-item';
+    const partes = [c.cuenta, c.tipo_pbx, c.paquete].filter(Boolean);
+    const sub = partes.length ? '<div class="ac-sub">' + partes.join(' · ') + '</div>' : '';
+    div.innerHTML = c.name + sub;
+    div.addEventListener('click', function() {
+      pickCli(c.sys_id, c.name, c.cuenta || '', c.tipo_pbx || '', c.paquete || '');
+    });
+    list.appendChild(div);
+  });
   list.style.display = 'block';
   chk1();
 }
