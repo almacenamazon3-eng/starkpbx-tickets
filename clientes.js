@@ -1,12 +1,8 @@
 // StarkPBX - Clientes ServiceNow
-// Este archivo contiene los datos RAW del conversor.
-// La función cleanData() al final limpia automáticamente los caracteres especiales.
-// NO editar manualmente — usar el conversor_clientes_servicenow.html para regenerar.
-
+// Limpieza automática de &amp; y caracteres especiales incluida
+// Para actualizar: pega los datos del conversor dentro del array RAW
+ 
 (function() {
-  // ── PEGAR AQUÍ EL RESULTADO DEL CONVERSOR ──────────────────────────────────
-  // Reemplaza el array de abajo con tu window.CLIENTES_DATA = [...] del conversor
-  // IMPORTANTE: deja esta función envolvente intacta, solo reemplaza el array
   var RAW = [
   { name: '2 REALPEOPLE SOLUTIONS', sys_id: '6a2e2cf08731ed1013c1cbbd0ebb355c', number: 'ACCT0012503' },
   { name: '2R TECHNOLOGY', sys_id: 'aaf1daf087652910935586ad0ebb3541', number: 'ACCT0010155' },
@@ -1048,11 +1044,10 @@
   { name: 'KURE MOTORS', sys_id: '5702923487652910935586ad0ebb3597', number: 'ACCT0011192' },
   { name: 'KYRON MOTORS', sys_id: 'db029234876' }
   ];
-  // ── FIN DEL ARRAY ───────────────────────────────────────────────────────────
-
-  // Función de limpieza automática de caracteres especiales
-  function clean(str) {
-    return str
+ 
+  // Limpia HTML entities y espacios
+  function clean(s) {
+    return s
       .replace(/&amp;amp;amp;/gi, '&')
       .replace(/&amp;amp;/gi, '&')
       .replace(/&amp;/gi, '&')
@@ -1060,18 +1055,15 @@
       .replace(/\s+/g, ' ')
       .trim();
   }
-
-  // Limpiar nombres y exponer como window.CLIENTES_DATA
+ 
   window.CLIENTES_DATA = RAW.map(function(c) {
     return {
-      name: clean(c.name),
-      sys_id: c.sys_id,
-      number: c.number,
-      cuenta: c.cuenta || '',
+      name:     clean(c.name),
+      sys_id:   c.sys_id,
+      number:   c.number,
+      cuenta:   c.cuenta   || '',
       tipo_pbx: c.tipo_pbx || '',
-      paquete: c.paquete || ''
+      paquete:  c.paquete  || ''
     };
   });
-
-  console.log('StarkPBX: ' + window.CLIENTES_DATA.length + ' clientes cargados');
 })();
