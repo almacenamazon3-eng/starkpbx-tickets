@@ -1,9 +1,9 @@
-// StarkPBX — Clientes ServiceNow
-// 1317 clientes | 113 con auto-relleno desde Excel
+// StarkPBX â Clientes ServiceNow (produccion)
+// 7151 clientes | 1338 con auto-relleno
 
 (function() {
   var RAW = [
-  { name: '"ASFICO CONSULTORES" FZE ASFICO SOCIEDAD CIVIL', sys_id: 'af825df9831d8e50c6129edfeeaad31b', number: 'ACCT0013126', cuenta: '200543509', tipo_pbx: 'Cloud', paquete: 'SIP 06' },
+    { name: 'ASFICO CONSULTORES" FZE ASFICO SOCIEDAD CIVIL', sys_id: 'af825df9831d8e50c6129edfeeaad31b', number: 'ACCT0013126', cuenta: '200543509', tipo_pbx: 'Cloud', paquete: 'SIP 06' },
     { name: '10CI VERACRUZ', sys_id: '405ddc543314ea10851872d24d5c7bb7', number: 'ACCT0016115', cuenta: '', tipo_pbx: '', paquete: '' },
     { name: '2 REALPEOPLE SOLUTIONS', sys_id: '6a2e2cf08731ed1013c1cbbd0ebb355c', number: 'ACCT0012503', cuenta: '', tipo_pbx: '', paquete: '' },
     { name: '2086 AFORE BANAMEX CD DEL CARMEN', sys_id: '506a10c047f57e904c831873e16d4327', number: 'ACCT0017976', cuenta: '', tipo_pbx: '', paquete: '' },
@@ -7156,14 +7156,21 @@
     { name: 'ÓMPUTO Y ELECTRÓNICA DE COATZACOALCOS', sys_id: '697280d833dcaa10851872d24d5c7ba2', number: 'ACCT0015635', cuenta: '', tipo_pbx: '', paquete: '' },
   ];
 
-  function clean(s) {
+ function clean(s) {
     return s.replace(/&amp;amp;amp;/gi,'&').replace(/&amp;amp;/gi,'&')
             .replace(/&amp;/gi,'&').replace(/&AMP;/gi,'&')
             .replace(/\s+/g,' ').trim();
   }
+
   window.CLIENTES_DATA = RAW.map(function(c) {
-    return { name: clean(c.name), sys_id: c.sys_id, number: c.number,
-             cuenta: c.cuenta||'', tipo_pbx: c.tipo_pbx||'', paquete: c.paquete||'' };
+    return {
+      name:     clean(c.name),
+      sys_id:   c.sys_id,
+      number:   c.number,
+      cuenta:   c.cuenta   || '',
+      tipo_pbx: c.tipo_pbx || '',
+      paquete:  c.paquete  || ''
+    };
   });
-  console.log('StarkPBX: '+window.CLIENTES_DATA.length+' clientes, 113 con auto-relleno');
+  console.log('StarkPBX: ' + window.CLIENTES_DATA.length + ' clientes cargados');
 })();
