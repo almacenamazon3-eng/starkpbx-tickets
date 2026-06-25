@@ -129,19 +129,35 @@
 
       <div class="f" id="f-cuenta">
         <label>Cuenta</label>
-        <input type="text" id="cuenta" placeholder="Se auto-rellena al elegir cliente">
+        <input type="text" id="cuenta" placeholder="Número de cuenta (manual o auto)">
         <div class="auto-badge" id="badge-cuenta"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado desde Excel</div>
       </div>
 
       <div class="g2">
         <div class="f" id="f-pbx-disp">
           <label>Tipo de PBX</label>
-          <input type="text" id="tipoPbxDisp" placeholder="Auto-rellena">
+          <select id="tipoPbxDisp">
+            <option value="">— Selecciona —</option>
+            <option value="Cloud">Cloud</option>
+            <option value="On premise">On Premise</option>
+          </select>
           <div class="auto-badge" id="badge-pbx"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
         </div>
         <div class="f" id="f-paq-disp">
           <label>Paquete</label>
-          <input type="text" id="paqueteDisp" placeholder="Auto-rellena">
+          <select id="paqueteDisp">
+            <option value="">— Selecciona —</option>
+            <option value="SIP 04">SIP 04</option>
+            <option value="SIP 06">SIP 06</option>
+            <option value="SIP 08">SIP 08</option>
+            <option value="SIP 10">SIP 10</option>
+            <option value="SIP 20">SIP 20</option>
+            <option value="SIP 30">SIP 30</option>
+            <option value="SIP 60">SIP 60</option>
+            <option value="SIP 90">SIP 90</option>
+            <option value="SIP 120">SIP 120</option>
+            <option value="SIP 350">SIP 350</option>
+          </select>
           <div class="auto-badge" id="badge-paq"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
         </div>
       </div>
@@ -511,15 +527,15 @@ function pickCli(sid, name, cuenta, tipoPbx, paquete) {
     document.getElementById('badge-cuenta').classList.add('show');
   }
 
-  // Auto-rellenar tipo PBX (solo display en paso 1)
+  // Auto-rellenar tipo PBX (select editable)
   const pbxDisp = document.getElementById('tipoPbxDisp');
-  pbxDisp.value = tipoPbx ? (PBX_MAP[tipoPbx]?.label || tipoPbx) : '';
+  pbxDisp.value = tipoPbx || '';
   if (tipoPbx) {
     pbxDisp.classList.add('auto');
     document.getElementById('badge-pbx').classList.add('show');
   }
 
-  // Auto-rellenar paquete (solo display en paso 1)
+  // Auto-rellenar paquete (select editable)
   const paqDisp = document.getElementById('paqueteDisp');
   paqDisp.value = paquete || '';
   if (paquete) {
@@ -558,17 +574,12 @@ function ir(n) {
 }
 
 function preseleccionarPaso2() {
-  // Pre-seleccionar tipo PBX si viene del Excel
-  if (cliData.tipoPbx && PBX_MAP[cliData.tipoPbx]) {
-    // El tipo_pbx se envía como hidden — se usa sys_id directamente
-  }
-
-  // Pre-seleccionar paquete si viene del Excel
-  if (cliData.paquete && PAQ_MAP[cliData.paquete]) {
+  // Pre-seleccionar paquete en paso 2 desde lo elegido en paso 1
+  const paqDisp = document.getElementById('paqueteDisp').value; // ej: "SIP 20"
+  if (paqDisp && PAQ_MAP[paqDisp]) {
     const paqSel = document.getElementById('paquete');
-    paqSel.value = PAQ_MAP[cliData.paquete];
+    paqSel.value = PAQ_MAP[paqDisp];
   }
-
   chk2();
 }
 
@@ -650,14 +661,14 @@ function pillLbl(c) {
 
 function buildPrev() {
   const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
-  const tipoPbxLabel = cliData.tipoPbx ? (PBX_MAP[cliData.tipoPbx]?.label || cliData.tipoPbx) : '—';
+  const tipoPbxLabel = document.getElementById('tipoPbxDisp').value || '—';
 
   const rows = [
     ['Cliente', lbl('cliSearch')],
     ['Cuenta', lbl('cuenta'), !!cliData.cuenta],
     ['Tipo de PBX', tipoPbxLabel, !!cliData.tipoPbx],
     ['Tipo de proyecto', lbl('tipo_proyecto')],
-    !esTFE ? ['Paquete', lbl('paquete'), !!cliData.paquete] : null,
+    !esTFE ? ['Paquete', lbl('paquete'), false] : null,
     ['Tipo de solución', lbl('tipo_solucion')],
     ['Solicitud', lbl('solicitud')],
     ['Descripción', document.getElementById('descripcion').value.trim()],
@@ -680,7 +691,9 @@ async function enviar() {
   btn.innerHTML = '<span class="spin"></span> Enviando...';
 
   const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
-  const tipoPbxSysId = cliData.tipoPbx ? (PBX_MAP[cliData.tipoPbx]?.sys_id || '') : '';
+  // Leer tipoPbx desde el SELECT del paso 1 (puede haber sido editado manualmente)
+  const tipoPbxVal = document.getElementById('tipoPbxDisp').value;
+  const tipoPbxSysId = tipoPbxVal ? (PBX_MAP[tipoPbxVal]?.sys_id || '') : '';
 
   const payload = {
     sysparm_quantity: 1,
