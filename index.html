@@ -133,33 +133,14 @@
         <div class="auto-badge" id="badge-cuenta"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado desde Excel</div>
       </div>
 
-      <div class="g2">
-        <div class="f" id="f-pbx-disp">
-          <label>Tipo de PBX</label>
-          <select id="tipoPbxDisp">
-            <option value="">— Selecciona —</option>
-            <option value="Cloud">Cloud</option>
-            <option value="On premise">On Premise</option>
-          </select>
-          <div class="auto-badge" id="badge-pbx"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
-        </div>
-        <div class="f" id="f-paq-disp">
-          <label>Paquete</label>
-          <select id="paqueteDisp">
-            <option value="">— Selecciona —</option>
-            <option value="SIP 04">SIP 04</option>
-            <option value="SIP 06">SIP 06</option>
-            <option value="SIP 08">SIP 08</option>
-            <option value="SIP 10">SIP 10</option>
-            <option value="SIP 20">SIP 20</option>
-            <option value="SIP 30">SIP 30</option>
-            <option value="SIP 60">SIP 60</option>
-            <option value="SIP 90">SIP 90</option>
-            <option value="SIP 120">SIP 120</option>
-            <option value="SIP 350">SIP 350</option>
-          </select>
-          <div class="auto-badge" id="badge-paq"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
-        </div>
+      <div class="f" id="f-pbx-disp">
+        <label>Tipo de PBX</label>
+        <select id="tipoPbxDisp">
+          <option value="">— Selecciona —</option>
+          <option value="Cloud">Cloud</option>
+          <option value="On premise">On Premise</option>
+        </select>
+        <div class="auto-badge" id="badge-pbx"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
       </div>
 
       <div class="nav">
@@ -181,6 +162,25 @@
           <option value="e98bbea0876a3990935586ad0ebb35c1">TFE GS</option>
           <option value="e8ab7aa0876a3990935586ad0ebb35ac">TFE VIP</option>
         </select>
+        <div class="em">Requerido</div>
+      </div>
+
+      <div class="f" id="f-paquete">
+        <label>Paquete <span class="r" id="paq-req">*</span><span class="locked" id="paq-locked" style="display:none"> — No aplica para TFE</span></label>
+        <select id="paqueteDisp" onchange="chk2()">
+          <option value="">— Selecciona —</option>
+          <option value="SIP 04">SIP 04</option>
+          <option value="SIP 06">SIP 06</option>
+          <option value="SIP 08">SIP 08</option>
+          <option value="SIP 10">SIP 10</option>
+          <option value="SIP 20">SIP 20</option>
+          <option value="SIP 30">SIP 30</option>
+          <option value="SIP 60">SIP 60</option>
+          <option value="SIP 90">SIP 90</option>
+          <option value="SIP 120">SIP 120</option>
+          <option value="SIP 350">SIP 350</option>
+        </select>
+        <div class="auto-badge" id="badge-paq"><i class="ti ti-check" style="font-size:11px"></i> Auto-rellenado</div>
         <div class="em">Requerido</div>
       </div>
 
@@ -572,6 +572,24 @@ function preseleccionarPaso2() {
 
 // ── PASO 2: Lógica tipo proyecto → bloquear paquete en TFE ──
 function onProyecto() {
+  const val = document.getElementById('tipo_proyecto').value;
+  const esTFE = TFE_IDS.includes(val);
+  const paqSel = document.getElementById('paqueteDisp');
+  const paqReq = document.getElementById('paq-req');
+  const paqLocked = document.getElementById('paq-locked');
+
+  if (esTFE) {
+    paqSel.value = '';
+    paqSel.disabled = true;
+    paqReq.style.display = 'none';
+    paqLocked.style.display = 'inline';
+  } else {
+    paqSel.disabled = false;
+    paqReq.style.display = 'inline';
+    paqLocked.style.display = 'none';
+    // Re-aplicar auto-relleno si viene del Excel
+    if (cliData.paquete) paqSel.value = cliData.paquete;
+  }
   chk2();
 }
 
@@ -593,7 +611,9 @@ function onSolucion() {
 }
 
 function chk2() {
+  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
   const camposReq = ['tipo_proyecto', 'tipo_solucion', 'solicitud'];
+  if (!esTFE) camposReq.push('paqueteDisp');
   const ok = camposReq.every(id => document.getElementById(id).value);
   document.getElementById('b2n').disabled = !ok;
 }
@@ -632,6 +652,7 @@ function buildPrev() {
     ['Cuenta', lbl('cuenta'), !!cliData.cuenta],
     ['Tipo de PBX', tipoPbxLabel, !!cliData.tipoPbx],
     ['Tipo de proyecto', lbl('tipo_proyecto')],
+    !TFE_IDS.includes(document.getElementById('tipo_proyecto').value) ? ['Paquete', lbl('paqueteDisp'), !!cliData.paquete] : null,
     ['Tipo de solución', lbl('tipo_solucion')],
     ['Solicitud', lbl('solicitud')],
     ['Descripción', document.getElementById('descripcion').value.trim()],
