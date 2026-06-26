@@ -127,13 +127,6 @@
         <div class="em">Selecciona un cliente de la lista</div>
       </div>
 
-      <div id="btn-sin-cliente" style="display:none; margin-bottom:.85rem;">
-        <button type="button" onclick="continuarSinCliente()" style="width:100%;padding:9px;border:1px dashed #d1d5db;border-radius:8px;background:#fffbeb;color:#92400e;font-size:13px;cursor:pointer;text-align:left;">
-          <i class="ti ti-alert-triangle" style="color:#d97706;margin-right:6px;"></i>
-          Cliente no encontrado — Continuar de emergencia sin cliente
-        </button>
-      </div>
-
       <div class="f" id="f-cuenta">
         <label>Cuenta</label>
         <input type="text" id="cuenta" placeholder="Número de cuenta (manual o auto)">
@@ -508,7 +501,7 @@ function buscarCliente() {
   }
   const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q)).slice(0, 30);
   if (!m.length) {
-    list.innerHTML = '<div class="ac-empty">Sin resultados — <span style="color:#1a73e8;cursor:pointer;text-decoration:underline" onclick="continuarSinCliente()">Continuar sin cliente</span></div>';
+    list.innerHTML = '<div class="ac-empty">Sin resultados</div>';
     list.style.display = 'block';
     chk1();
     return;
@@ -526,8 +519,7 @@ function buscarCliente() {
     list.appendChild(div);
   });
   list.style.display = 'block';
-  // Mostrar botón de emergencia si no hay resultados y hay texto
-  document.getElementById('btn-sin-cliente').style.display = (!m.length && q.length >= 2) ? 'block' : 'none';
+
   chk1();
 }
 
@@ -562,7 +554,7 @@ function pickCli(sid, name, cuenta, tipoPbx, paquete) {
     document.getElementById('badge-paq').classList.add('show');
   }
 
-  document.getElementById('btn-sin-cliente').style.display = 'none';
+
   chk1();
 }
 
@@ -580,27 +572,13 @@ function limpiarAutoFill() {
   const inp = document.getElementById('cliSearch');
   inp.style.borderColor = '';
   inp.style.background = '';
-  document.getElementById('btn-sin-cliente').style.display = 'none';
+
 }
 
 function chk1() {
   document.getElementById('b1n').disabled = !cliOk;
 }
 
-function continuarSinCliente() {
-  const nombre = document.getElementById('cliSearch').value.trim();
-  document.getElementById('cliSysId').value = '';
-  document.getElementById('acList').style.display = 'none';
-  document.getElementById('btn-sin-cliente').style.display = 'none';
-  // Marcar como cliente manual (sin sys_id)
-  cliData = { sid: '', name: nombre, cuenta: '', tipoPbx: '', paquete: '', esEmergencia: true };
-  cliOk = true;
-  // Indicar visualmente que es modo emergencia
-  const inp = document.getElementById('cliSearch');
-  inp.style.borderColor = '#d97706';
-  inp.style.background = '#fffbeb';
-  chk1();
-}
 
 // ── Al entrar al paso 2: pre-seleccionar tipo PBX y paquete si vienen del Excel ──
 function ir(n) {
@@ -725,25 +703,19 @@ async function enviar() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Enviando...';
 
-  // Leer tipoPbx desde el SELECT del paso 1 (puede haber sido editado manualmente)
-  const tipoPbxVal = document.getElementById('tipoPbxDisp').value;
-  const tipoPbxSysId = tipoPbxVal ? (PBX_MAP[tipoPbxVal]?.sys_id || '') : '';
-
   const payload = {
     sysparm_quantity: 1,
     telegram_user: window.Telegram?.WebApp?.initDataUnsafe?.user?.username || 'desconocido',
     variables: {
       cuenta: document.getElementById('cuenta').value.trim(),
       cliente: document.getElementById('cliSysId').value,
-      tipo_de_pbx: tipoPbxSysId,
+      tipo_de_pbx: document.getElementById('tipoPbxDisp').value,
       tipo_de_proyecto: document.getElementById('tipo_proyecto').value,
-      paquete: PAQ_MAP[document.getElementById('paqueteDisp').value] || document.getElementById('paqueteDisp').value || '',
+      paquete: document.getElementById('paqueteDisp').value || '',
       tipo_de_solucion: document.getElementById('tipo_solucion').value,
       solicitud: document.getElementById('solicitud').value,
       ci_relacionado: 'O00018',
-      descripcion_general: (cliData.esEmergencia
-        ? '[CLIENTE NO ENCONTRADO EN SISTEMA: ' + (cliData.name || 'sin nombre') + ']\n\n'
-        : '') + document.getElementById('descripcion').value.trim(),
+      descripcion_general: document.getElementById('descripcion').value.trim(),
       tiempo_promedio: document.getElementById('tiempo').value,
       urgencia: document.getElementById('urgencia').value,
       impacto: document.getElementById('impacto').value,
