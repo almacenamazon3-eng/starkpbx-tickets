@@ -127,6 +127,13 @@
         <div class="em">Selecciona un cliente de la lista</div>
       </div>
 
+      <div id="btn-sin-cliente" style="display:none; margin-bottom:.85rem;">
+        <button type="button" onclick="continuarSinCliente()" style="width:100%;padding:9px;border:1px dashed #d1d5db;border-radius:8px;background:#fffbeb;color:#92400e;font-size:13px;cursor:pointer;text-align:left;">
+          <i class="ti ti-alert-triangle" style="color:#d97706;margin-right:6px;"></i>
+          Cliente no encontrado — Continuar de emergencia sin cliente
+        </button>
+      </div>
+
       <div class="f" id="f-cuenta">
         <label>Cuenta</label>
         <input type="text" id="cuenta" placeholder="Número de cuenta (manual o auto)">
@@ -232,6 +239,23 @@
           <option value="240">240 minutos</option>
           <option value="480">480 minutos</option>
           <option value="1440">1 día (1440 min)</option>
+        </select>
+        <div class="em">Requerido</div>
+      </div>
+
+      <div class="f" id="f-ingeniero">
+        <label>Ingeniero asignado <span class="r">*</span></label>
+        <select id="ingeniero_asignado" onchange="chk3()">
+          <option value="">— Selecciona ingeniero —</option>
+          <option value="0310ab2a8764a51013c1cbbd0ebb357d">Karina Cruz Gomez</option>
+          <option value="10202f2a8764a51013c1cbbd0ebb3586">Antonio Bello Lopez</option>
+          <option value="3a106b2a8764a51013c1cbbd0ebb35e4">Roberto Gonzalez Rodriguez</option>
+          <option value="8710ab2a8764a51013c1cbbd0ebb3533">Marcos Alejo Hernandez</option>
+          <option value="a6106b2a8764a51013c1cbbd0ebb35cb">Valeria Cruz Mendoza</option>
+          <option value="9c202f2a8764a51013c1cbbd0ebb358d">Andres Carapia Castañeda</option>
+          <option value="48202f2a8764a51013c1cbbd0ebb3529">Dante Chavez Godoy</option>
+          <option value="3310eb2a8764a51013c1cbbd0ebb3550">Ignacio Abel Juarez Hernandez</option>
+          <option value="98202f2a8764a51013c1cbbd0ebb35be">Alejandra Leon Ortiz</option>
         </select>
         <div class="em">Requerido</div>
       </div>
@@ -484,7 +508,7 @@ function buscarCliente() {
   }
   const m = CLIENTS.filter(c => c.name.toLowerCase().includes(q)).slice(0, 30);
   if (!m.length) {
-    list.innerHTML = '<div class="ac-empty">Sin resultados</div>';
+    list.innerHTML = '<div class="ac-empty">Sin resultados — <span style="color:#1a73e8;cursor:pointer;text-decoration:underline" onclick="continuarSinCliente()">Continuar sin cliente</span></div>';
     list.style.display = 'block';
     chk1();
     return;
@@ -502,6 +526,8 @@ function buscarCliente() {
     list.appendChild(div);
   });
   list.style.display = 'block';
+  // Mostrar botón de emergencia si no hay resultados y hay texto
+  document.getElementById('btn-sin-cliente').style.display = (!m.length && q.length >= 2) ? 'block' : 'none';
   chk1();
 }
 
@@ -536,6 +562,7 @@ function pickCli(sid, name, cuenta, tipoPbx, paquete) {
     document.getElementById('badge-paq').classList.add('show');
   }
 
+  document.getElementById('btn-sin-cliente').style.display = 'none';
   chk1();
 }
 
@@ -549,10 +576,30 @@ function limpiarAutoFill() {
   ['badge-cuenta','badge-pbx','badge-paq'].forEach(id => {
     document.getElementById(id).classList.remove('show');
   });
+  // Resetear estilo del buscador (por si venía de modo emergencia)
+  const inp = document.getElementById('cliSearch');
+  inp.style.borderColor = '';
+  inp.style.background = '';
+  document.getElementById('btn-sin-cliente').style.display = 'none';
 }
 
 function chk1() {
   document.getElementById('b1n').disabled = !cliOk;
+}
+
+function continuarSinCliente() {
+  const nombre = document.getElementById('cliSearch').value.trim();
+  document.getElementById('cliSysId').value = '';
+  document.getElementById('acList').style.display = 'none';
+  document.getElementById('btn-sin-cliente').style.display = 'none';
+  // Marcar como cliente manual (sin sys_id)
+  cliData = { sid: '', name: nombre, cuenta: '', tipoPbx: '', paquete: '', esEmergencia: true };
+  cliOk = true;
+  // Indicar visualmente que es modo emergencia
+  const inp = document.getElementById('cliSearch');
+  inp.style.borderColor = '#d97706';
+  inp.style.background = '#fffbeb';
+  chk1();
 }
 
 // ── Al entrar al paso 2: pre-seleccionar tipo PBX y paquete si vienen del Excel ──
@@ -629,6 +676,7 @@ function pill(campo, val, nivel, el) {
 function chk3() {
   const ok = document.getElementById('descripcion').value.trim()
     && document.getElementById('tiempo').value
+    && document.getElementById('ingeniero_asignado').value
     && document.getElementById('impacto').value
     && document.getElementById('urgencia').value;
   document.getElementById('b3n').disabled = !ok;
@@ -657,6 +705,7 @@ function buildPrev() {
     ['Solicitud', lbl('solicitud')],
     ['Descripción', document.getElementById('descripcion').value.trim()],
     ['Tiempo promedio', lbl('tiempo') + ' min'],
+    ['Ingeniero asignado', lbl('ingeniero_asignado')],
     document.getElementById('ticket_ca_service').value ? ['Ticket CA Service', lbl('ticket_ca_service')] : null,
     document.getElementById('fecha_ca_service').value ? ['Fecha CA Service', lbl('fecha_ca_service')] : null,
     ['Impacto', pillLbl('impacto')],
@@ -692,12 +741,15 @@ async function enviar() {
       tipo_de_solucion: document.getElementById('tipo_solucion').value,
       solicitud: document.getElementById('solicitud').value,
       ci_relacionado: 'O00018',
-      descripcion_general: document.getElementById('descripcion').value.trim(),
+      descripcion_general: (cliData.esEmergencia
+        ? '[CLIENTE NO ENCONTRADO EN SISTEMA: ' + (cliData.name || 'sin nombre') + ']\n\n'
+        : '') + document.getElementById('descripcion').value.trim(),
       tiempo_promedio: document.getElementById('tiempo').value,
       urgencia: document.getElementById('urgencia').value,
       impacto: document.getElementById('impacto').value,
-      ticket_ca_service: document.getElementById('ticket_ca_service').value.trim(),
-      fecha_ca_service: document.getElementById('fecha_ca_service').value,
+      ticket_ca_service:  document.getElementById('ticket_ca_service').value.trim(),
+      fecha_ca_service:   document.getElementById('fecha_ca_service').value,
+      usuario_asignado:   document.getElementById('ingeniero_asignado').value,
     }
   };
 
