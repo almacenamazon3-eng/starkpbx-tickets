@@ -184,24 +184,6 @@
         <div class="em">Requerido</div>
       </div>
 
-      <div class="f" id="f-paquete">
-        <label>Paquete <span class="r" id="paq-req">*</span> <span class="locked" id="paq-locked" style="display:none">— No aplica para TFE</span></label>
-        <select id="paquete" onchange="chk2()">
-          <option value="">— Selecciona —</option>
-          <option value="SIP_004">SIP 04</option>
-          <option value="SIP_006">SIP 06</option>
-          <option value="SIP_008">SIP 08</option>
-          <option value="SIP_010">SIP 10</option>
-          <option value="SIP_020">SIP 20</option>
-          <option value="SIP_030">SIP 30</option>
-          <option value="SIP_060">SIP 60</option>
-          <option value="SIP_090">SIP 90</option>
-          <option value="SIP_120">SIP 120</option>
-          <option value="SIP_350">SIP 350</option>
-        </select>
-        <div class="em">Requerido</div>
-      </div>
-
       <div class="f" id="f-solucion">
         <label>Tipo de solución <span class="r">*</span></label>
         <select id="tipo_solucion" onchange="onSolucion()">
@@ -252,6 +234,17 @@
           <option value="1440">1 día (1440 min)</option>
         </select>
         <div class="em">Requerido</div>
+      </div>
+
+      <div class="g2">
+        <div class="f" id="f-ticket-ca">
+          <label>Ticket CA Service</label>
+          <input type="text" id="ticket_ca_service" placeholder="Ej: ATLU000057">
+        </div>
+        <div class="f" id="f-fecha-ca">
+          <label>Fecha CA Service</label>
+          <input type="datetime-local" id="fecha_ca_service">
+        </div>
       </div>
 
       <div class="f">
@@ -574,37 +567,11 @@ function ir(n) {
 }
 
 function preseleccionarPaso2() {
-  // Pre-seleccionar paquete en paso 2 desde lo elegido en paso 1
-  const paqDisp = document.getElementById('paqueteDisp').value; // ej: "SIP 20"
-  if (paqDisp && PAQ_MAP[paqDisp]) {
-    const paqSel = document.getElementById('paquete');
-    paqSel.value = PAQ_MAP[paqDisp];
-  }
   chk2();
 }
 
 // ── PASO 2: Lógica tipo proyecto → bloquear paquete en TFE ──
 function onProyecto() {
-  const val = document.getElementById('tipo_proyecto').value;
-  const esTFE = TFE_IDS.includes(val);
-  const paqSel = document.getElementById('paquete');
-  const paqReq = document.getElementById('paq-req');
-  const paqLocked = document.getElementById('paq-locked');
-
-  if (esTFE) {
-    paqSel.value = '';
-    paqSel.disabled = true;
-    paqReq.style.display = 'none';
-    paqLocked.style.display = 'inline';
-  } else {
-    paqSel.disabled = false;
-    paqReq.style.display = 'inline';
-    paqLocked.style.display = 'none';
-    // Re-aplicar auto-relleno si hay dato del Excel
-    if (cliData.paquete && PAQ_MAP[cliData.paquete]) {
-      paqSel.value = PAQ_MAP[cliData.paquete];
-    }
-  }
   chk2();
 }
 
@@ -626,9 +593,7 @@ function onSolucion() {
 }
 
 function chk2() {
-  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
   const camposReq = ['tipo_proyecto', 'tipo_solucion', 'solicitud'];
-  if (!esTFE) camposReq.push('paquete');
   const ok = camposReq.every(id => document.getElementById(id).value);
   document.getElementById('b2n').disabled = !ok;
 }
@@ -660,7 +625,6 @@ function pillLbl(c) {
 }
 
 function buildPrev() {
-  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
   const tipoPbxLabel = document.getElementById('tipoPbxDisp').value || '—';
 
   const rows = [
@@ -668,11 +632,12 @@ function buildPrev() {
     ['Cuenta', lbl('cuenta'), !!cliData.cuenta],
     ['Tipo de PBX', tipoPbxLabel, !!cliData.tipoPbx],
     ['Tipo de proyecto', lbl('tipo_proyecto')],
-    !esTFE ? ['Paquete', lbl('paquete'), false] : null,
     ['Tipo de solución', lbl('tipo_solucion')],
     ['Solicitud', lbl('solicitud')],
     ['Descripción', document.getElementById('descripcion').value.trim()],
     ['Tiempo promedio', lbl('tiempo') + ' min'],
+    document.getElementById('ticket_ca_service').value ? ['Ticket CA Service', lbl('ticket_ca_service')] : null,
+    document.getElementById('fecha_ca_service').value ? ['Fecha CA Service', lbl('fecha_ca_service')] : null,
     ['Impacto', pillLbl('impacto')],
     ['Urgencia', pillLbl('urgencia')],
   ].filter(Boolean);
@@ -690,7 +655,6 @@ async function enviar() {
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span> Enviando...';
 
-  const esTFE = TFE_IDS.includes(document.getElementById('tipo_proyecto').value);
   // Leer tipoPbx desde el SELECT del paso 1 (puede haber sido editado manualmente)
   const tipoPbxVal = document.getElementById('tipoPbxDisp').value;
   const tipoPbxSysId = tipoPbxVal ? (PBX_MAP[tipoPbxVal]?.sys_id || '') : '';
@@ -703,7 +667,7 @@ async function enviar() {
       cliente: document.getElementById('cliSysId').value,
       tipo_de_pbx: tipoPbxSysId,
       tipo_de_proyecto: document.getElementById('tipo_proyecto').value,
-      paquete: esTFE ? '' : document.getElementById('paquete').value,
+      paquete: PAQ_MAP[document.getElementById('paqueteDisp').value] || document.getElementById('paqueteDisp').value || '',
       tipo_de_solucion: document.getElementById('tipo_solucion').value,
       solicitud: document.getElementById('solicitud').value,
       ci_relacionado: 'O00018',
@@ -711,6 +675,8 @@ async function enviar() {
       tiempo_promedio: document.getElementById('tiempo').value,
       urgencia: document.getElementById('urgencia').value,
       impacto: document.getElementById('impacto').value,
+      ticket_ca_service: document.getElementById('ticket_ca_service').value.trim(),
+      fecha_ca_service: document.getElementById('fecha_ca_service').value,
     }
   };
 
